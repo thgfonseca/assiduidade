@@ -527,7 +527,6 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
 // ════════════════════════════════════════════════
 const GAS_URL         = 'https://script.google.com/macros/s/AKfycbyDILy-OkroqPdtwEW6ohmhe3wggLJEKZJRVXsd-159BoQ52kU5On7PrTPZOfs_J2EB/exec';
 const GOOGLE_CLIENT_ID = '1051968147490-ch0u4hkd57h66c0i0q03ovdvdo3utus1.apps.googleusercontent.com';
-const ADMIN_EMAILS    = ['dex@riogrande.ifrs.edu.br','dppi@riogrande.ifrs.edu.br','den@riogrande.ifrs.edu.br'];
 const DOMAIN          = '@riogrande.ifrs.edu.br';
 
 // ════════════════════════════════════════════════
@@ -572,7 +571,7 @@ function startGoogleLogin(){
 }
 
 async function handleToken(resp){
-  if(resp.error){showErr();return;}
+  if(resp.error){showErr('Erro ao autenticar com o Google. Tente novamente.');return;}
   try{
     showLoader();
     const ures = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{
@@ -580,17 +579,42 @@ async function handleToken(resp){
     });
     const prof = await ures.json();
     const email = (prof.email||'').toLowerCase();
-    if(!email.endsWith(DOMAIN)){hideLoader();showErr();return;}
-    const r = await api('login',{email,nome:prof.name,picture:prof.picture});
-    if(!r.ok){hideLoader();showErr();return;}
-    CU = {...r.user, picture:prof.picture};
-    isAdmin = ADMIN_EMAILS.includes(email);
+
+    // Verifica domínio antes de chamar o backend
+    if(!email.endsWith(DOMAIN)){
+      hideLoader();
+      showErr('Acesso negado. Apenas e-mails <strong>@riogrande.ifrs.edu.br</strong> são permitidos.');
+      return;
+    }
+
+    // Toda decisão de role (admin vs coord) é feita exclusivamente no backend
+    const r = await api('login',{email, nome: prof.name || ''});
+    if(!r.ok){
+      hideLoader();
+      if(r.reason === 'not_registered'){
+        showErr('Seu e-mail não está cadastrado como coordenador. Solicite ao administrador que realize o seu cadastro.');
+      } else {
+        showErr('Acesso negado. Verifique seu e-mail institucional.');
+      }
+      return;
+    }
+
+    CU = { ...r.user, picture: prof.picture };
+    isAdmin = (r.user.role === 'admin'); // apenas reflete o que o backend decidiu
     await loadData();
     hideLoader();
     isAdmin ? enterAdmin() : enterCoord();
-  }catch(e){hideLoader();showErr();}
+  }catch(e){
+    hideLoader();
+    showErr('Erro de conexão. Verifique sua internet e tente novamente.');
+    console.error(e);
+  }
 }
-function showErr(){document.getElementById('login-err').classList.add('show');}
+function showErr(msg){
+  const el=document.getElementById('login-err');
+  if(msg) el.innerHTML=msg;
+  el.classList.add('show');
+}
 
 // ════════════════════════════════════════════════
 // LOADER / TOAST / CONFIRM
