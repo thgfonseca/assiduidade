@@ -4,430 +4,422 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Assiduidade — IFRS Rio Grande</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
-  --orange: #E85D04;
-  --orange-light: #FF6B08;
-  --orange-dark: #C44B00;
-  --orange-pale: #FFF3EB;
-  --orange-pale2: #FFE8D6;
-  --bg: #F9F5F2;
-  --bg2: #FFFFFF;
-  --text: #1A1208;
-  --text2: #5C4A35;
-  --text3: #9C8270;
-  --border: #E8D8CA;
-  --border2: #D4BFA8;
-  --success: #1A7F4B;
-  --success-bg: #E8F7EF;
-  --danger: #C0392B;
-  --danger-bg: #FDECEA;
-  --warn: #B45309;
-  --warn-bg: #FEF3C7;
-  --radius: 14px;
-  --radius-sm: 8px;
-  --shadow: 0 2px 12px rgba(232,93,4,0.08);
-  --shadow-md: 0 4px 24px rgba(232,93,4,0.12);
+  --blue:       #1A56DB;
+  --blue-l:     #1E63F0;
+  --blue-d:     #1240A8;
+  --blue-p:     #EBF0FF;
+  --blue-p2:    #D6E4FF;
+  --bg:           #F7F3F0;
+  --bg2:          #FFFFFF;
+  --text:         #1A1208;
+  --text2:        #5C4A35;
+  --text3:        #9C8270;
+  --border:       #E8D8CA;
+  --border2:      #D4BFA8;
+  --success:      #1A7F4B;
+  --success-bg:   #E8F7EF;
+  --danger:       #C0392B;
+  --danger-bg:    #FDECEA;
+  --warn:         #B45309;
+  --warn-bg:      #FEF3C7;
+  --r:            14px;
+  --shadow:       0 2px 12px rgba(232,93,4,.07);
+  --shadow-md:    0 4px 28px rgba(232,93,4,.13);
 }
-
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-h1,h2,h3,h4{font-family:'Sora',sans-serif}
+h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
 
-/* ─── LOADER ─── */
-#loader{position:fixed;inset:0;background:var(--orange);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s}
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s}
 #loader.hide{opacity:0;pointer-events:none}
-#loader svg{width:64px;height:64px;animation:spin 1s linear infinite}
-#loader p{color:#fff;margin-top:16px;font-family:'Sora',sans-serif;font-weight:600;font-size:15px;letter-spacing:.5px}
+#loader svg{width:52px;height:52px;animation:spin 1s linear infinite}
+#loader p{color:#fff;margin-top:14px;font-family:'Sora',sans-serif;font-weight:600;font-size:14px;opacity:.85}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ─── PAGES ─── */
-.page{display:none;min-height:100vh}
-.page.active{display:block}
+/* PAGES */
+.page{display:none;min-height:100vh;flex-direction:column}
+.page.active{display:flex}
 
-/* ─── LOGIN PAGE ─── */
-#page-login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1A0A00 0%,#3D1400 50%,#1A0A00 100%);position:relative;overflow:hidden}
-#page-login::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(232,93,4,.18) 0%,transparent 70%)}
-.login-dots{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.login-dots span{position:absolute;border-radius:50%;background:rgba(232,93,4,.15)}
-.login-card{background:rgba(255,255,255,.04);border:1px solid rgba(232,93,4,.25);border-radius:24px;padding:48px 40px;width:100%;max-width:440px;position:relative;backdrop-filter:blur(20px)}
-.login-logo{display:flex;align-items:center;gap:14px;margin-bottom:36px}
-.login-logo-icon{width:52px;height:52px;background:var(--orange);border-radius:14px;display:flex;align-items:center;justify-content:center}
-.login-logo-icon svg{width:28px;height:28px;fill:#fff}
-.login-logo-text{color:#fff}
-.login-logo-text h1{font-size:18px;font-weight:700;line-height:1.1}
-.login-logo-text p{font-size:12px;color:rgba(255,255,255,.5);margin-top:2px}
-.login-title{color:#fff;font-size:24px;font-weight:700;margin-bottom:6px}
-.login-sub{color:rgba(255,255,255,.5);font-size:14px;margin-bottom:32px}
-.field-wrap{margin-bottom:16px}
-.field-wrap label{display:block;color:rgba(255,255,255,.7);font-size:13px;font-weight:500;margin-bottom:8px}
-.field-wrap input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(232,93,4,.3);border-radius:10px;padding:14px 16px;color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
-.field-wrap input::placeholder{color:rgba(255,255,255,.3)}
-.field-wrap input:focus{border-color:var(--orange)}
-.btn-login{width:100%;background:var(--orange);color:#fff;border:none;border-radius:12px;padding:16px;font-family:'Sora',sans-serif;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s,transform .1s}
-.btn-login:hover{background:var(--orange-light)}
-.btn-login:active{transform:scale(.98)}
-.login-error{background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.4);border-radius:10px;padding:12px 16px;color:#FF8A7A;font-size:13px;margin-top:12px;display:none}
-.login-error.show{display:block}
-.login-hint{color:rgba(255,255,255,.3);font-size:12px;text-align:center;margin-top:20px}
+/* ══ LOGIN ══ */
+#page-login{align-items:center;justify-content:center;background:#0D2A6B;position:relative;overflow:hidden}
+.ring{position:absolute;border-radius:50%;border:1px solid rgba(232,93,4,.1)}
+.ring:nth-child(1){width:480px;height:480px;animation:pulse 4s ease-in-out infinite}
+.ring:nth-child(2){width:720px;height:720px;animation:pulse 4s ease-in-out infinite 1.3s}
+.ring:nth-child(3){width:980px;height:980px;animation:pulse 4s ease-in-out infinite 2.6s}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:.1}}
+.login-card{position:relative;z-index:2;background:rgba(255,255,255,.04);border:1px solid rgba(232,93,4,.2);border-radius:24px;padding:48px 44px;width:100%;max-width:420px;backdrop-filter:blur(24px)}
+.login-brand{display:flex;align-items:center;gap:13px;margin-bottom:38px}
+.login-brand-icon{width:48px;height:48px;background:var(--blue);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.login-brand-icon svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.login-brand-text h1{color:#fff;font-size:16px;font-weight:700}
+.login-brand-text p{color:rgba(255,255,255,.4);font-size:12px;margin-top:2px}
+.login-h{color:#fff;font-size:25px;font-weight:800;margin-bottom:8px}
+.login-sub{color:rgba(255,255,255,.4);font-size:14px;line-height:1.5;margin-bottom:34px}
+.google-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:none;border-radius:12px;padding:14px 20px;font-family:'Sora',sans-serif;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;transition:all .2s;box-shadow:0 2px 16px rgba(0,0,0,.2)}
+.google-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+.google-btn:active{transform:scale(.97)}
+.google-btn svg{width:21px;height:21px;flex-shrink:0}
+.login-divider{display:flex;align-items:center;gap:11px;margin:18px 0}
+.login-divider span{color:rgba(255,255,255,.2);font-size:12px}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1)}
+.login-note{color:rgba(255,255,255,.25);font-size:12px;text-align:center;line-height:1.5}
+.login-err{background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.35);border-radius:10px;padding:12px 15px;color:#FF8A7A;font-size:13px;margin-top:14px;display:none;line-height:1.5}
+.login-err.show{display:block}
 
-/* ─── MAIN LAYOUT ─── */
-#page-admin, #page-coord{min-height:100vh;display:flex;flex-direction:column}
-.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
-.topbar-brand{display:flex;align-items:center;gap:12px}
-.topbar-brand-icon{width:38px;height:38px;background:var(--orange);border-radius:10px;display:flex;align-items:center;justify-content:center}
-.topbar-brand-icon svg{width:20px;height:20px;fill:#fff}
-.topbar-brand-text h2{font-size:15px;font-weight:700;color:var(--text)}
-.topbar-brand-text p{font-size:11px;color:var(--text3)}
-.topbar-right{display:flex;align-items:center;gap:16px}
-.topbar-user{display:flex;align-items:center;gap:10px}
-.topbar-avatar{width:36px;height:36px;background:var(--orange-pale2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:700;font-size:13px;color:var(--orange-dark)}
-.topbar-user-info{font-size:13px}
-.topbar-user-info strong{display:block;color:var(--text);font-weight:600}
-.topbar-user-info span{color:var(--text3);font-size:11px}
-.btn-logout{background:none;border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:13px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
-.btn-logout:hover{border-color:var(--orange);color:var(--orange)}
+/* ══ TOPBAR ══ */
+.topbar{background:#fff;border-bottom:2px solid var(--border);padding:0 30px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:var(--shadow)}
+.tb-brand{display:flex;align-items:center;gap:11px}
+.tb-icon{width:35px;height:35px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.tb-icon svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.tb-text strong{display:block;font-size:14px;font-weight:700}
+.tb-text span{font-size:11px;color:var(--text3)}
+.tb-right{display:flex;align-items:center;gap:13px}
+.tb-user{display:flex;align-items:center;gap:9px}
+.tb-av{width:33px;height:33px;background:var(--blue-p2);border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:700;font-size:12px;color:var(--blue-d);flex-shrink:0}
+.tb-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.tb-uinfo strong{display:block;font-size:13px;font-weight:600}
+.tb-uinfo span{font-size:11px;color:var(--text3)}
+.role-pill{background:var(--blue-p);color:var(--blue-d);font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;font-family:'Sora',sans-serif;text-transform:uppercase;letter-spacing:.5px}
+.role-pill.coord{background:#E8F0FE;color:#1A56DB}
+.btn-out{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 13px;font-size:13px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-out:hover{border-color:var(--blue);color:var(--blue)}
 
-/* ─── TABS ─── */
-.tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;display:flex;gap:4px}
-.tab-btn{background:none;border:none;padding:16px 20px;font-family:'Sora',sans-serif;font-size:14px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
-.tab-btn.active{color:var(--orange);border-bottom-color:var(--orange)}
+/* ══ TABS ══ */
+.tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 30px;display:flex;gap:2px}
+.tab-btn{background:none;border:none;padding:14px 20px;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;display:flex;align-items:center;gap:7px}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
 .tab-btn:hover:not(.active){color:var(--text2)}
+.tab-btn svg{width:15px;height:15px;opacity:.6;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tab-btn.active svg{opacity:1}
 
-/* ─── CONTENT ─── */
-.content{padding:28px;flex:1}
+/* ══ CONTENT ══ */
+.content{padding:26px 30px;flex:1}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 
-/* ─── SECTION HEADER ─── */
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:gap}
-.section-title{font-size:20px;font-weight:700;color:var(--text)}
-.section-sub{font-size:13px;color:var(--text3);margin-top:2px}
-
-/* ─── BTN ─── */
-.btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:12px 20px;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
-.btn-primary{background:var(--orange);color:#fff}
-.btn-primary:hover{background:var(--orange-light)}
-.btn-primary:active{transform:scale(.97)}
-.btn-secondary{background:var(--orange-pale);color:var(--orange-dark);border:1px solid var(--orange-pale2)}
-.btn-secondary:hover{background:var(--orange-pale2)}
-.btn-sm{padding:8px 14px;font-size:13px;border-radius:8px}
+/* ══ BUTTONS ══ */
+.btn{display:inline-flex;align-items:center;gap:7px;border-radius:10px;padding:10px 16px;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;line-height:1}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-l)}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
 .btn-danger{background:var(--danger-bg);color:var(--danger);border:1px solid #f5c6c2}
 .btn-danger:hover{background:#fbd5d2}
-.btn-icon{background:none;border:1px solid var(--border);border-radius:8px;padding:7px 10px;cursor:pointer;color:var(--text3);transition:all .15s;font-size:13px}
-.btn-icon:hover{border-color:var(--orange);color:var(--orange)}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:8px}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
 
-/* ─── TABLE ─── */
-.table-wrap{background:#fff;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}
-table{width:100%;border-collapse:collapse}
-thead th{background:var(--orange-pale);padding:12px 16px;text-align:left;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--orange-dark);text-transform:uppercase;letter-spacing:.5px}
-tbody tr{border-top:1px solid var(--border)}
-tbody tr:hover{background:var(--bg)}
-tbody td{padding:14px 16px;font-size:14px;color:var(--text2)}
-.td-actions{display:flex;gap:6px}
+/* ══ BADGES ══ */
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Sora',sans-serif}
+.b-ensino{background:#E8F0FE;color:#1A56DB}
+.b-pesquisa{background:#E8F7EF;color:#1A7F4B}
+.b-extensao{background:#FEF3C7;color:#B45309}
+.b-indissociavel{background:#F3E8FF;color:#7C3AED}
+.b-bolsista{background:var(--blue-p2);color:var(--blue-d)}
+.b-voluntario{background:#E8F7EF;color:#1A7F4B}
+.b-ativo{background:#E8F7EF;color:#1A7F4B}
+.b-inativo{background:#F3F4F6;color:#6B7280}
+.b-pendente{background:var(--warn-bg);color:var(--warn)}
+.b-validado{background:var(--success-bg);color:var(--success)}
 
-/* ─── MODAL ─── */
-.modal-overlay{position:fixed;inset:0;background:rgba(26,8,0,.5);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
-.modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:20px;width:100%;max-width:500px;box-shadow:var(--shadow-md);max-height:90vh;overflow:auto}
-.modal-header{padding:24px 28px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.modal-header h3{font-size:18px;font-weight:700}
-.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3);line-height:1;padding:4px}
-.modal-close:hover{color:var(--text)}
-.modal-body{padding:0 28px 28px}
-.form-row{margin-bottom:16px}
-.form-row label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px}
-.form-row input,.form-row select,.form-row textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:#fff;outline:none;transition:border-color .2s}
-.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--orange)}
-.form-row textarea{resize:vertical;min-height:80px}
-.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
+/* ══ GERENCIAMENTO HIERARQUIA ══ */
+.mgmt-root{display:flex;flex-direction:column;gap:18px}
 
-/* ─── BADGE ─── */
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
-.badge-ensino{background:#E8F0FE;color:#1A56DB}
-.badge-pesquisa{background:#E8F7EF;color:#1A7F4B}
-.badge-extensao{background:#FEF3C7;color:#B45309}
-.badge-indissociavel{background:#F3E8FF;color:#7C3AED}
-.badge-bolsista{background:var(--orange-pale2);color:var(--orange-dark)}
-.badge-voluntario{background:#E8F7EF;color:#1A7F4B}
-.badge-ativo{background:#E8F7EF;color:#1A7F4B}
-.badge-inativo{background:#F3F4F6;color:#6B7280}
-.badge-pendente{background:var(--warn-bg);color:var(--warn)}
-.badge-validado{background:var(--success-bg);color:var(--success)}
+/* Coord card */
+.coord-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.coord-head{display:flex;align-items:center;gap:13px;padding:17px 20px;cursor:pointer;user-select:none;transition:background .15s}
+.coord-head:hover{background:var(--bg)}
+.coord-head.expanded{border-bottom:1px solid var(--border)}
+.coord-av{width:42px;height:42px;background:var(--blue);border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
+.coord-info{flex:1;min-width:0}
+.coord-info strong{display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.coord-info em{font-style:normal;font-size:12px;color:var(--text3)}
+.coord-meta{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.count-chip{font-size:11px;color:var(--text3);background:var(--bg);padding:3px 9px;border-radius:20px;font-family:'Sora',sans-serif;white-space:nowrap}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--text3);padding:5px;border-radius:7px;transition:all .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon-btn:hover{background:var(--border);color:var(--blue)}
+.icon-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.chev{width:17px;height:17px;fill:none;stroke:var(--text3);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s;flex-shrink:0}
+.chev.open{transform:rotate(180deg)}
+.coord-body{display:none;padding:14px 20px 18px}
+.coord-body.open{display:block}
 
-/* ─── ASSIDUIDADE / COORD ─── */
-.assid-header{background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:24px 28px;margin-bottom:24px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
-.assid-meta{display:flex;gap:24px;flex-wrap:wrap}
-.assid-meta-item label{font-size:12px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
-.assid-meta-item select{border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--text);background:#fff;outline:none;cursor:pointer;font-family:'DM Sans',sans-serif}
-.assid-meta-item select:focus{border-color:var(--orange)}
-.project-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden;box-shadow:var(--shadow)}
-.project-card-header{background:var(--orange-pale);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--orange-pale2)}
-.project-card-title{font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--orange-dark)}
-.project-card-meta{font-size:12px;color:var(--text3);margin-top:4px}
-.project-card-body{padding:20px 24px}
-.participants-list{margin-bottom:20px}
-.participant-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
-.participant-row:last-child{border-bottom:none}
-.participant-cb{width:22px;height:22px;accent-color:var(--orange);cursor:pointer;flex-shrink:0}
-.participant-name{flex:1;font-size:14px;font-weight:500}
-.participant-type{}
-.obs-area{margin-bottom:16px}
-.obs-area label{font-size:13px;font-weight:600;color:var(--text2);display:block;margin-bottom:8px}
-.obs-area textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:#fff;outline:none;resize:vertical;min-height:80px;transition:border-color .2s}
-.obs-area textarea:focus{border-color:var(--orange)}
-.declaracao-wrap{display:flex;align-items:flex-start;gap:12px;background:var(--orange-pale);border:1px solid var(--orange-pale2);border-radius:10px;padding:16px;cursor:pointer}
-.declaracao-wrap input[type=checkbox]{width:20px;height:20px;accent-color:var(--orange);flex-shrink:0;margin-top:2px;cursor:pointer}
-.declaracao-text{font-size:13px;color:var(--orange-dark);line-height:1.5}
-.declaracao-text strong{font-weight:700}
+/* Seg block */
+.seg-block{margin-top:13px;background:var(--bg);border:1px solid var(--border);border-radius:11px;overflow:hidden}
+.seg-head{display:flex;align-items:center;gap:11px;padding:12px 15px;cursor:pointer;user-select:none;transition:background .15s}
+.seg-head:hover{background:rgba(0,0,0,.04)}
+.seg-head.expanded{border-bottom:1px solid var(--border)}
+.seg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dot-Ensino{background:#1A56DB}
+.dot-Pesquisa{background:#1A7F4B}
+.dot-Extensão{background:#B45309}
+.dot-Indissociável{background:#7C3AED}
+.seg-info{flex:1}
+.seg-info strong{font-size:13px;font-weight:700}
+.seg-info em{font-style:normal;font-size:11px;color:var(--text3);margin-left:7px}
+.seg-body{display:none;padding:10px 15px 14px}
+.seg-body.open{display:block}
 
-/* ─── SUBMIT BAR ─── */
-.submit-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;z-index:50}
-.submit-bar-info{font-size:13px;color:var(--text3)}
-.submit-bar-info strong{color:var(--text)}
-.btn-submit-final{background:var(--orange);color:#fff;border:none;border-radius:12px;padding:16px 32px;font-family:'Sora',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px}
-.btn-submit-final:hover{background:var(--orange-light);transform:translateY(-1px);box-shadow:0 4px 16px rgba(232,93,4,.3)}
-.btn-submit-final:active{transform:scale(.97)}
-.btn-submit-final:disabled{background:#ccc;cursor:not-allowed;transform:none;box-shadow:none}
+/* Proj block */
+.proj-block{margin-top:9px;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.proj-head{display:flex;align-items:center;gap:11px;padding:11px 14px;cursor:pointer;transition:background .15s}
+.proj-head:hover{background:var(--bg)}
+.proj-head.expanded{border-bottom:1px solid var(--border)}
+.proj-ico{width:30px;height:30px;background:var(--blue-p);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.proj-ico svg{width:14px;height:14px;fill:none;stroke:var(--blue-d);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.proj-info{flex:1;min-width:0}
+.proj-info strong{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.proj-info em{font-style:normal;font-size:11px;color:var(--text3)}
+.proj-body{display:none;padding:10px 14px 13px}
+.proj-body.open{display:block}
 
-/* ─── FILTER BAR ─── */
-.filter-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end}
-.filter-item{display:flex;flex-direction:column;gap:6px}
-.filter-item label{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
-.filter-item select{border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--text);background:#fff;outline:none;font-family:'DM Sans',sans-serif;min-width:160px}
-.filter-item select:focus{border-color:var(--orange)}
+/* Participantes */
+.part-list{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
+.part-row{display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+.part-row-name{flex:1;font-size:13px;font-weight:500}
 
-/* ─── CONFERÊNCIA CARD ─── */
-.conf-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden;box-shadow:var(--shadow)}
-.conf-card-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
-.conf-card-header:hover{background:var(--bg)}
-.conf-card-header-left h4{font-size:15px;font-weight:700;color:var(--text)}
-.conf-card-header-left p{font-size:12px;color:var(--text3);margin-top:2px}
-.conf-card-header-right{display:flex;align-items:center;gap:10px}
-.conf-card-body{display:none;padding:20px}
-.conf-card-body.open{display:block}
-.conf-participant-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
-.conf-participant-row:last-child{border-bottom:none}
-.conf-participant-name{font-size:14px;font-weight:500}
-.conf-status-chip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
-.conf-status-present{background:#E8F7EF;color:#1A7F4B}
-.conf-status-absent{background:#FDECEA;color:#C0392B}
-.conf-obs-box{background:var(--bg);border-radius:8px;padding:12px 14px;margin-top:12px;font-size:13px;color:var(--text2)}
-.conf-obs-box strong{color:var(--text)}
-.conf-decl{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--success)}
-.conf-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+/* Add buttons */
+.add-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:9px;border:1.5px dashed var(--border2);background:transparent;color:var(--text3);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:7px}
+.add-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-p)}
+.add-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
 
-/* ─── EMPTY STATE ─── */
-.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
-.empty-state svg{width:56px;height:56px;opacity:.35;margin:0 auto 16px}
-.empty-state h3{font-size:16px;font-weight:600;color:var(--text2);margin-bottom:6px}
-.empty-state p{font-size:14px}
+/* Root coord add button */
+.add-coord-wrap{margin-top:6px}
+.add-coord-btn{display:flex;align-items:center;gap:12px;padding:17px 20px;background:#fff;border:2px dashed var(--border2);border-radius:var(--r);cursor:pointer;transition:all .2s;color:var(--text3);font-family:'Sora',sans-serif;font-weight:600;font-size:14px;width:100%}
+.add-coord-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-p)}
+.add-coord-plus{width:38px;height:38px;background:var(--bg);border-radius:9px;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
+.add-coord-btn:hover .add-coord-plus{background:var(--blue-p2)}
+.add-coord-plus svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
 
-/* ─── STATS STRIP ─── */
-.stats-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
-.stat-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;box-shadow:var(--shadow)}
-.stat-card .val{font-family:'Sora',sans-serif;font-size:28px;font-weight:700;color:var(--orange)}
-.stat-card .lbl{font-size:12px;color:var(--text3);margin-top:4px}
+/* Inline form */
+.iform{background:var(--blue-p);border:1px solid var(--blue-p2);border-radius:10px;padding:13px 15px;margin-top:9px;display:none;animation:fadeDown .2s ease}
+.iform.open{display:block}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.iform-row{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end}
+.iform-field{flex:1;min-width:150px}
+.iform-field label{display:block;font-size:11px;font-weight:700;color:var(--blue-d);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.iform-field input,.iform-field select{width:100%;border:1px solid var(--border2);border-radius:8px;padding:9px 11px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:#fff;outline:none;transition:border-color .2s}
+.iform-field input:focus,.iform-field select:focus{border-color:var(--blue)}
+.iform-actions{display:flex;gap:7px;margin-top:9px}
 
-/* ─── TOAST ─── */
-#toast-container{position:fixed;bottom:24px;right:24px;z-index:9998;display:flex;flex-direction:column;gap:10px}
-.toast{background:#1A1208;color:#fff;border-radius:12px;padding:14px 20px;font-size:14px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.25);animation:toastIn .3s ease;max-width:340px}
-.toast.success::before{content:'✓';width:22px;height:22px;background:var(--success);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
-.toast.error::before{content:'✕';width:22px;height:22px;background:var(--danger);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
-.toast.info::before{content:'i';width:22px;height:22px;background:var(--orange);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
-@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+/* ══ MODAL ══ */
+.modal-ov{position:fixed;inset:0;background:rgba(26,8,0,.5);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-ov.open{display:flex}
+.modal{background:#fff;border-radius:20px;width:100%;max-width:460px;box-shadow:var(--shadow-md);max-height:92vh;overflow:auto;animation:modalIn .22s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.modal-hd{padding:22px 26px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-hd h3{font-size:16px;font-weight:700}
+.modal-cl{background:none;border:none;font-size:21px;cursor:pointer;color:var(--text3);line-height:1;padding:4px;border-radius:6px}
+.modal-cl:hover{color:var(--text)}
+.modal-bd{padding:0 26px 26px}
+.frow{margin-bottom:13px}
+.frow label{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.frow input,.frow select{width:100%;border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:#fff;outline:none;transition:border-color .2s}
+.frow input:focus,.frow select:focus{border-color:var(--blue)}
+.modal-ft{display:flex;gap:9px;justify-content:flex-end;margin-top:18px}
 
-/* ─── CONFIRM DIALOG ─── */
-#confirm-overlay{position:fixed;inset:0;background:rgba(26,8,0,.5);backdrop-filter:blur(4px);z-index:800;display:none;align-items:center;justify-content:center}
-#confirm-overlay.open{display:flex}
-.confirm-box{background:#fff;border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:var(--shadow-md)}
-.confirm-box h3{font-size:18px;font-weight:700;margin-bottom:8px}
-.confirm-box p{font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.5}
-.confirm-box-btns{display:flex;gap:12px;justify-content:center}
+/* ══ CONFERÊNCIA ══ */
+.filter-bar{display:flex;gap:11px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end}
+.fi label{display:block;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.fi select{border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-size:13px;color:var(--text);background:#fff;outline:none;font-family:'DM Sans',sans-serif;min-width:155px;cursor:pointer}
+.fi select:focus{border-color:var(--blue)}
+.conf-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);margin-bottom:13px;overflow:hidden;box-shadow:var(--shadow)}
+.conf-hd{padding:15px 19px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .15s}
+.conf-hd:hover{background:var(--bg)}
+.conf-hd h4{font-size:14px;font-weight:700}
+.conf-hd p{font-size:12px;color:var(--text3);margin-top:2px}
+.conf-bd{display:none;padding:16px 19px;border-top:1px solid var(--border)}
+.conf-bd.open{display:block}
+.conf-prow{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)}
+.conf-prow:last-of-type{border-bottom:none}
+.conf-chip{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Sora',sans-serif}
+.chip-yes{background:#E8F7EF;color:#1A7F4B}
+.chip-no{background:#FDECEA;color:#C0392B}
+.conf-obs{background:var(--bg);border-radius:8px;padding:9px 13px;margin-top:11px;font-size:13px;color:var(--text2);line-height:1.5}
+.conf-decl{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:12px;color:var(--success);font-weight:600}
+.conf-decl svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
+.conf-acts{display:flex;gap:7px;margin-top:13px;flex-wrap:wrap}
 
-/* ─── RESP ─── */
+/* ══ COORD ASSIDUIDADE ══ */
+.assid-banner{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:13px;box-shadow:var(--shadow)}
+.assid-banner h2{font-size:17px;font-weight:700}
+.assid-banner p{font-size:13px;color:var(--text3);margin-top:3px}
+.mes-wrap label{display:block;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.mes-wrap select{border:1.5px solid var(--border);border-radius:9px;padding:9px 13px;font-size:14px;color:var(--text);background:#fff;outline:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+.mes-wrap select:focus{border-color:var(--blue)}
+.passid-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);margin-bottom:17px;overflow:hidden;box-shadow:var(--shadow)}
+.passid-hd{background:var(--blue-p);padding:16px 20px;border-bottom:1px solid var(--blue-p2);display:flex;align-items:center;justify-content:space-between}
+.passid-hd h3{font-size:14px;font-weight:700;color:var(--blue-d)}
+.passid-hd p{font-size:12px;color:var(--text3);margin-top:2px}
+.passid-bd{padding:16px 20px}
+.pcheck-row{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border)}
+.pcheck-row:last-of-type{border-bottom:none}
+.pcheck-row input[type=checkbox]{width:19px;height:19px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
+.pcheck-row label{flex:1;font-size:14px;font-weight:500;cursor:pointer}
+.obs-field{margin:14px 0}
+.obs-field label{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.obs-field textarea{width:100%;border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:#fff;outline:none;resize:vertical;min-height:78px;transition:border-color .2s}
+.obs-field textarea:focus{border-color:var(--blue)}
+.decl-wrap{display:flex;align-items:flex-start;gap:11px;background:var(--blue-p);border:1px solid var(--blue-p2);border-radius:10px;padding:13px;cursor:pointer}
+.decl-wrap input{width:19px;height:19px;accent-color:var(--blue);flex-shrink:0;margin-top:1px;cursor:pointer}
+.decl-text{font-size:13px;color:var(--blue-d);line-height:1.5}
+.decl-text strong{font-weight:700}
+.sent-chip{display:inline-flex;align-items:center;gap:6px;background:var(--success-bg);color:var(--success);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;font-family:'Sora',sans-serif}
+.sent-chip svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
+
+/* ══ SUBMIT BAR ══ */
+.sub-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:13px 30px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:11px;z-index:50;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.sub-info{font-size:13px;color:var(--text3);line-height:1.4}
+.sub-info strong{color:var(--text);display:block;margin-bottom:1px}
+.btn-submit{background:var(--blue);color:#fff;border:none;border-radius:11px;padding:13px 28px;font-family:'Sora',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px}
+.btn-submit:hover:not(:disabled){background:var(--blue-l);box-shadow:0 4px 16px rgba(232,93,4,.3);transform:translateY(-1px)}
+.btn-submit:disabled{background:#ccc;cursor:not-allowed}
+
+/* ══ TOAST ══ */
+#toast-wrap{position:fixed;bottom:22px;right:22px;z-index:9998;display:flex;flex-direction:column;gap:8px}
+.toast{background:#1A1208;color:#fff;border-radius:12px;padding:12px 17px;font-size:13px;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.25);animation:tIn .25s ease;max-width:310px;line-height:1.4}
+.toast-ico{width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.toast.success .toast-ico{background:var(--success)}
+.toast.error .toast-ico{background:var(--danger)}
+.toast.info .toast-ico{background:var(--blue)}
+@keyframes tIn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+
+/* ══ CONFIRM ══ */
+#confirm-ov{position:fixed;inset:0;background:rgba(26,8,0,.55);backdrop-filter:blur(4px);z-index:800;display:none;align-items:center;justify-content:center}
+#confirm-ov.open{display:flex}
+.confirm-box{background:#fff;border-radius:20px;padding:28px 26px;max-width:350px;width:100%;text-align:center;box-shadow:var(--shadow-md);animation:modalIn .22s ease}
+.confirm-box h3{font-size:16px;font-weight:700;margin-bottom:8px}
+.confirm-box p{font-size:14px;color:var(--text2);margin-bottom:20px;line-height:1.5}
+.confirm-btns{display:flex;gap:9px;justify-content:center}
+
+/* ══ EMPTY ══ */
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty svg{width:44px;height:44px;opacity:.28;margin:0 auto 13px;display:block;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.empty h3{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:5px}
+.empty p{font-size:13px}
+
 @media(max-width:640px){
-  .topbar{padding:0 16px}
-  .content{padding:16px}
-  .tabs{padding:0 16px}
-  .assid-header{padding:16px}
-  .section-header{flex-direction:column;align-items:flex-start}
-  .submit-bar{padding:14px 16px}
+  .topbar,.content,.sub-bar{padding-left:14px;padding-right:14px}
+  .tabs{padding:0 14px}
+  .login-card{padding:34px 24px}
 }
-
-.chevron{transition:transform .25s}
-.chevron.open{transform:rotate(180deg)}
 </style>
 </head>
 <body>
 
-<!-- LOADER -->
 <div id="loader">
-  <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="25" cy="25" r="20" stroke="rgba(255,255,255,.3)" stroke-width="4"/>
-    <path d="M25 5 A20 20 0 0 1 45 25" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-  </svg>
+  <svg viewBox="0 0 50 50" fill="none"><circle cx="25" cy="25" r="20" stroke="rgba(255,255,255,.25)" stroke-width="4"/><path d="M25 5 A20 20 0 0 1 45 25" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>
   <p>Carregando...</p>
 </div>
 
-<!-- TOAST -->
-<div id="toast-container"></div>
+<div id="toast-wrap"></div>
 
-<!-- CONFIRM -->
-<div id="confirm-overlay">
+<div id="confirm-ov">
   <div class="confirm-box">
-    <h3 id="confirm-title">Confirmar</h3>
-    <p id="confirm-msg">Tem certeza?</p>
-    <div class="confirm-box-btns">
-      <button class="btn btn-secondary" onclick="confirmResolve(false)">Cancelar</button>
-      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmResolve(true)">Confirmar</button>
+    <h3 id="c-title">Confirmar</h3>
+    <p id="c-msg">Tem certeza?</p>
+    <div class="confirm-btns">
+      <button class="btn btn-ghost" onclick="confirmResolve(false)">Cancelar</button>
+      <button class="btn btn-danger" id="c-ok" onclick="confirmResolve(true)">Confirmar</button>
     </div>
   </div>
 </div>
 
-<!-- ==================== LOGIN ==================== -->
+<!-- ══════════ LOGIN ══════════ -->
 <div id="page-login" class="page active">
-  <div class="login-dots" id="loginDots"></div>
+  <div class="ring"></div><div class="ring"></div><div class="ring"></div>
   <div class="login-card">
-    <div class="login-logo">
-      <div class="login-logo-icon">
+    <div class="login-brand">
+      <div class="login-brand-icon">
         <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
       </div>
-      <div class="login-logo-text">
+      <div class="login-brand-text">
         <h1>IFRS Rio Grande</h1>
         <p>Sistema de Assiduidade</p>
       </div>
     </div>
-    <h2 class="login-title">Bem-vindo</h2>
-    <p class="login-sub">Informe seu e-mail institucional para acessar</p>
-    <div class="field-wrap">
-      <label>E-mail institucional</label>
-      <input type="email" id="login-email" placeholder="nome@riogrande.ifrs.edu.br" autocomplete="email"/>
-    </div>
-    <button class="btn-login" onclick="doLogin()">
-      Entrar
+    <h2 class="login-h">Acesse sua conta</h2>
+    <p class="login-sub">Use sua conta Google institucional<br>@riogrande.ifrs.edu.br para entrar.</p>
+    <button class="google-btn" onclick="startGoogleLogin()">
+      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Entrar com Google
     </button>
-    <div class="login-error" id="login-error">E-mail inválido. Use seu e-mail @riogrande.ifrs.edu.br.</div>
-    <p class="login-hint">Acesso restrito a colaboradores do IFRS Rio Grande</p>
+    <div class="login-err" id="login-err">
+      Acesso negado. Apenas e-mails <strong>@riogrande.ifrs.edu.br</strong> são permitidos neste sistema.
+    </div>
+    <div class="login-divider"><span>acesso restrito</span></div>
+    <p class="login-note">Sistema exclusivo para coordenadores e administradores do IFRS Rio Grande.</p>
   </div>
 </div>
 
-<!-- ==================== ADMIN ==================== -->
+<!-- ══════════ ADMIN ══════════ -->
 <div id="page-admin" class="page">
   <div class="topbar">
-    <div class="topbar-brand">
-      <div class="topbar-brand-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-      </div>
-      <div class="topbar-brand-text">
-        <h2>Assiduidade IFRS</h2>
-        <p>Painel Administrativo</p>
-      </div>
+    <div class="tb-brand">
+      <div class="tb-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <div class="tb-text"><strong>Assiduidade IFRS</strong><span>Painel Administrativo</span></div>
     </div>
-    <div class="topbar-right">
-      <div class="topbar-user">
-        <div class="topbar-avatar" id="admin-avatar">AD</div>
-        <div class="topbar-user-info">
-          <strong id="admin-user-name">Admin</strong>
-          <span id="admin-user-email">—</span>
-        </div>
+    <div class="tb-right">
+      <span class="role-pill">Admin</span>
+      <div class="tb-user">
+        <div class="tb-av" id="adm-av">AD</div>
+        <div class="tb-uinfo"><strong id="adm-name">—</strong><span id="adm-email">—</span></div>
       </div>
-      <button class="btn-logout" onclick="doLogout()">Sair</button>
+      <button class="btn-out" onclick="doLogout()">Sair</button>
     </div>
   </div>
-
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('admin','coordenadores')">Coordenadores</button>
-    <button class="tab-btn" onclick="switchTab('admin','segmentos')">Segmentos</button>
-    <button class="tab-btn" onclick="switchTab('admin','projetos')">Projetos</button>
-    <button class="tab-btn" onclick="switchTab('admin','participantes')">Participantes</button>
-    <button class="tab-btn" onclick="switchTab('admin','conferencia')">Conferência</button>
+    <button class="tab-btn active" id="tb-ger" onclick="adminTab('ger')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Gerenciamento
+    </button>
+    <button class="tab-btn" id="tb-conf" onclick="adminTab('conf')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Conferência
+    </button>
   </div>
-
   <div class="content">
 
-    <!-- TAB: Coordenadores -->
-    <div class="tab-panel active" id="admin-tab-coordenadores">
-      <div class="section-header">
-        <div><h2 class="section-title">Coordenadores</h2><p class="section-sub">Gerenciar coordenadores cadastrados</p></div>
-        <button class="btn btn-primary" onclick="openModal('coord-modal')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Novo Coordenador
-        </button>
+    <!-- TAB GERENCIAMENTO -->
+    <div class="tab-panel active" id="panel-ger">
+      <div style="margin-bottom:20px">
+        <h2 style="font-size:18px;font-weight:800">Gerenciamento</h2>
+        <p style="font-size:13px;color:var(--text3);margin-top:3px">Coordenadores → Segmentos → Projetos → Participantes</p>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Nome</th><th>E-mail</th><th>Segmento</th><th>Status</th><th>Ações</th></tr></thead>
-          <tbody id="tb-coordenadores"></tbody>
-        </table>
+      <div class="mgmt-root" id="mgmt-root"></div>
+      <div class="add-coord-wrap">
+        <button class="add-coord-btn" onclick="toggleIForm('iform-coord')">
+          <div class="add-coord-plus"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+          Adicionar Coordenador
+        </button>
+        <div class="iform" id="iform-coord">
+          <div class="iform-row">
+            <div class="iform-field"><label>Nome completo</label><input type="text" id="nc-nome" placeholder="Nome do coordenador"/></div>
+            <div class="iform-field"><label>E-mail institucional</label><input type="email" id="nc-email" placeholder="nome@riogrande.ifrs.edu.br"/></div>
+          </div>
+          <div class="iform-actions">
+            <button class="btn btn-primary btn-sm" onclick="addCoord()">Adicionar</button>
+            <button class="btn btn-ghost btn-sm" onclick="closeIForm('iform-coord')">Cancelar</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- TAB: Segmentos -->
-    <div class="tab-panel" id="admin-tab-segmentos">
-      <div class="section-header">
-        <div><h2 class="section-title">Segmentos</h2><p class="section-sub">Ensino, Pesquisa, Extensão, Indissociável</p></div>
-        <button class="btn btn-primary" onclick="openModal('segmento-modal')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Novo Segmento
-        </button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Nome</th><th>Coordenador Responsável</th><th>Ações</th></tr></thead>
-          <tbody id="tb-segmentos"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB: Projetos -->
-    <div class="tab-panel" id="admin-tab-projetos">
-      <div class="section-header">
-        <div><h2 class="section-title">Projetos</h2><p class="section-sub">Todos os projetos cadastrados</p></div>
-        <button class="btn btn-primary" onclick="openModal('projeto-modal')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Novo Projeto
-        </button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Título</th><th>Coordenador</th><th>Segmento</th><th>Status</th><th>Ações</th></tr></thead>
-          <tbody id="tb-projetos"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB: Participantes -->
-    <div class="tab-panel" id="admin-tab-participantes">
-      <div class="section-header">
-        <div><h2 class="section-title">Participantes</h2><p class="section-sub">Bolsistas e voluntários por projeto</p></div>
-        <button class="btn btn-primary" onclick="openModal('participante-modal')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Novo Participante
-        </button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Nome</th><th>Tipo</th><th>Projeto</th><th>Coordenador</th><th>Ações</th></tr></thead>
-          <tbody id="tb-participantes"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB: Conferência -->
-    <div class="tab-panel" id="admin-tab-conferencia">
-      <div class="section-header">
-        <div><h2 class="section-title">Conferência de Assiduidade</h2><p class="section-sub">Visualizar assiduidades enviadas pelos coordenadores</p></div>
+    <!-- TAB CONFERÊNCIA -->
+    <div class="tab-panel" id="panel-conf">
+      <div style="margin-bottom:20px">
+        <h2 style="font-size:18px;font-weight:800">Conferência de Assiduidade</h2>
+        <p style="font-size:13px;color:var(--text3);margin-top:3px">Visualize e valide as assiduidades enviadas</p>
       </div>
       <div class="filter-bar">
-        <div class="filter-item">
-          <label>Mês</label>
-          <select id="conf-filter-mes" onchange="renderConferencia()"></select>
-        </div>
-        <div class="filter-item">
-          <label>Segmento</label>
-          <select id="conf-filter-segmento" onchange="renderConferencia()">
+        <div class="fi"><label>Mês</label><select id="conf-mes" onchange="renderConf()"></select></div>
+        <div class="fi"><label>Segmento</label>
+          <select id="conf-seg" onchange="renderConf()">
             <option value="">Todos</option>
             <option>Ensino</option><option>Pesquisa</option><option>Extensão</option><option>Indissociável</option>
           </select>
@@ -436,749 +428,788 @@ tbody td{padding:14px 16px;font-size:14px;color:var(--text2)}
       <div id="conf-list"></div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /page-admin -->
+  </div>
+</div>
 
-<!-- ==================== COORDENADOR ==================== -->
+<!-- ══════════ COORDENADOR ══════════ -->
 <div id="page-coord" class="page">
   <div class="topbar">
-    <div class="topbar-brand">
-      <div class="topbar-brand-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-      </div>
-      <div class="topbar-brand-text">
-        <h2>Assiduidade IFRS</h2>
-        <p>Área do Coordenador</p>
-      </div>
+    <div class="tb-brand">
+      <div class="tb-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <div class="tb-text"><strong>Assiduidade IFRS</strong><span>Área do Coordenador</span></div>
     </div>
-    <div class="topbar-right">
-      <div class="topbar-user">
-        <div class="topbar-avatar" id="coord-avatar">CO</div>
-        <div class="topbar-user-info">
-          <strong id="coord-user-name">Coordenador</strong>
-          <span id="coord-user-email">—</span>
-        </div>
+    <div class="tb-right">
+      <span class="role-pill coord">Coordenador</span>
+      <div class="tb-user">
+        <div class="tb-av" id="crd-av">CO</div>
+        <div class="tb-uinfo"><strong id="crd-name">—</strong><span id="crd-email">—</span></div>
       </div>
-      <button class="btn-logout" onclick="doLogout()">Sair</button>
+      <button class="btn-out" onclick="doLogout()">Sair</button>
     </div>
   </div>
-
   <div class="content">
-    <div class="assid-header">
-      <div>
-        <h2 style="font-family:'Sora',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px">Registro de Assiduidade</h2>
-        <p style="font-size:13px;color:var(--text3)">Marque a presença dos participantes para o mês selecionado</p>
-      </div>
-      <div class="assid-meta">
-        <div class="assid-meta-item">
-          <label>Mês de referência</label>
-          <select id="coord-mes" onchange="renderCoordProjects()"></select>
-        </div>
-      </div>
+    <div class="assid-banner">
+      <div><h2>Registro de Assiduidade</h2><p>Marque a presença e envie ao final do mês</p></div>
+      <div class="mes-wrap"><label>Mês de referência</label><select id="coord-mes" onchange="renderCoordProjs()"></select></div>
     </div>
-
-    <div id="coord-projects-list"></div>
+    <div id="coord-projs"></div>
   </div>
-
-  <div class="submit-bar">
-    <div class="submit-bar-info">
-      <strong id="submit-summary">—</strong><br>
-      Confira antes de enviar. Não será possível reenviar no mesmo mês.
-    </div>
-    <button class="btn-submit-final" id="btn-submit-all" onclick="submitAll()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  <div class="sub-bar">
+    <div class="sub-info"><strong id="sub-summary">—</strong>Confirme a declaração antes de enviar.</div>
+    <button class="btn-submit" id="btn-submit" onclick="submitAll()" disabled>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       Enviar Assiduidade
     </button>
   </div>
 </div>
 
-<!-- ==================== MODAIS ==================== -->
-
-<!-- Modal Coordenador -->
-<div class="modal-overlay" id="coord-modal">
+<!-- MODAIS -->
+<div class="modal-ov" id="m-edit-coord">
   <div class="modal">
-    <div class="modal-header"><h3 id="coord-modal-title">Novo Coordenador</h3><button class="modal-close" onclick="closeModal('coord-modal')">×</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="coord-edit-id"/>
-      <div class="form-row"><label>Nome completo</label><input type="text" id="coord-nome" placeholder="Nome do coordenador"/></div>
-      <div class="form-row"><label>E-mail institucional</label><input type="email" id="coord-email" placeholder="nome@riogrande.ifrs.edu.br"/></div>
-      <div class="form-row">
-        <label>Status</label>
-        <select id="coord-status"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('coord-modal')">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveCoord()">Salvar</button>
+    <div class="modal-hd"><h3>Editar Coordenador</h3><button class="modal-cl" onclick="closeModal('m-edit-coord')">×</button></div>
+    <div class="modal-bd">
+      <input type="hidden" id="ec-id"/>
+      <div class="frow"><label>Nome</label><input type="text" id="ec-nome"/></div>
+      <div class="frow"><label>E-mail</label><input type="email" id="ec-email"/></div>
+      <div class="frow"><label>Status</label><select id="ec-status"><option>Ativo</option><option>Inativo</option></select></div>
+      <div class="modal-ft">
+        <button class="btn btn-ghost" onclick="closeModal('m-edit-coord')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveEditCoord()">Salvar</button>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Modal Segmento -->
-<div class="modal-overlay" id="segmento-modal">
+<div class="modal-ov" id="m-edit-seg">
   <div class="modal">
-    <div class="modal-header"><h3 id="segmento-modal-title">Novo Segmento</h3><button class="modal-close" onclick="closeModal('segmento-modal')">×</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="segmento-edit-id"/>
-      <div class="form-row">
-        <label>Tipo de segmento</label>
-        <select id="segmento-nome">
-          <option>Ensino</option><option>Pesquisa</option><option>Extensão</option><option>Indissociável</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>Coordenador responsável</label>
-        <select id="segmento-coord"></select>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('segmento-modal')">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveSegmento()">Salvar</button>
+    <div class="modal-hd"><h3>Editar Segmento</h3><button class="modal-cl" onclick="closeModal('m-edit-seg')">×</button></div>
+    <div class="modal-bd">
+      <input type="hidden" id="es-id"/>
+      <div class="frow"><label>Tipo</label><select id="es-nome"><option>Ensino</option><option>Pesquisa</option><option>Extensão</option><option>Indissociável</option></select></div>
+      <div class="modal-ft">
+        <button class="btn btn-ghost" onclick="closeModal('m-edit-seg')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveEditSeg()">Salvar</button>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Modal Projeto -->
-<div class="modal-overlay" id="projeto-modal">
+<div class="modal-ov" id="m-edit-proj">
   <div class="modal">
-    <div class="modal-header"><h3 id="projeto-modal-title">Novo Projeto</h3><button class="modal-close" onclick="closeModal('projeto-modal')">×</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="projeto-edit-id"/>
-      <div class="form-row"><label>Título do projeto</label><input type="text" id="projeto-titulo" placeholder="Nome completo do projeto"/></div>
-      <div class="form-row"><label>Coordenador</label><select id="projeto-coord"></select></div>
-      <div class="form-row"><label>Segmento</label><select id="projeto-segmento"><option>Ensino</option><option>Pesquisa</option><option>Extensão</option><option>Indissociável</option></select></div>
-      <div class="form-row"><label>Status</label><select id="projeto-status"><option>Ativo</option><option>Inativo</option></select></div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('projeto-modal')">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveProjeto()">Salvar</button>
+    <div class="modal-hd"><h3>Editar Projeto</h3><button class="modal-cl" onclick="closeModal('m-edit-proj')">×</button></div>
+    <div class="modal-bd">
+      <input type="hidden" id="ep-id"/>
+      <div class="frow"><label>Título</label><input type="text" id="ep-titulo"/></div>
+      <div class="frow"><label>Status</label><select id="ep-status"><option>Ativo</option><option>Inativo</option></select></div>
+      <div class="modal-ft">
+        <button class="btn btn-ghost" onclick="closeModal('m-edit-proj')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveEditProj()">Salvar</button>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Modal Participante -->
-<div class="modal-overlay" id="participante-modal">
+<div class="modal-ov" id="m-edit-part">
   <div class="modal">
-    <div class="modal-header"><h3 id="part-modal-title">Novo Participante</h3><button class="modal-close" onclick="closeModal('participante-modal')">×</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="part-edit-id"/>
-      <div class="form-row"><label>Nome completo</label><input type="text" id="part-nome" placeholder="Nome do participante"/></div>
-      <div class="form-row"><label>Tipo</label><select id="part-tipo"><option>Bolsista</option><option>Voluntário</option></select></div>
-      <div class="form-row"><label>Projeto</label><select id="part-projeto"></select></div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('participante-modal')">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveParticipante()">Salvar</button>
+    <div class="modal-hd"><h3>Editar Participante</h3><button class="modal-cl" onclick="closeModal('m-edit-part')">×</button></div>
+    <div class="modal-bd">
+      <input type="hidden" id="ept-id"/>
+      <div class="frow"><label>Nome</label><input type="text" id="ept-nome"/></div>
+      <div class="frow"><label>Tipo</label><select id="ept-tipo"><option>Bolsista</option><option>Voluntário</option></select></div>
+      <div class="modal-ft">
+        <button class="btn btn-ghost" onclick="closeModal('m-edit-part')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveEditPart()">Salvar</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// ============================================================
-// CONFIGURAÇÃO — altere para a URL do seu Google Apps Script
-// ============================================================
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyDILy-OkroqPdtwEW6ohmhe3wggLJEKZJRVXsd-159BoQ52kU5On7PrTPZOfs_J2EB/exec';
+// ════════════════════════════════════════════════
+// CONFIG — substitua antes de publicar
+// ════════════════════════════════════════════════
+const GAS_URL         = 'https://script.google.com/macros/s/AKfycbyDILy-OkroqPdtwEW6ohmhe3wggLJEKZJRVXsd-159BoQ52kU5On7PrTPZOfs_J2EB/exec';
+const GOOGLE_CLIENT_ID = 'SEU_CLIENT_ID.apps.googleusercontent.com';
+const ADMIN_EMAILS    = ['dex@riogrande.ifrs.edu.br','dppi@riogrande.ifrs.edu.br','den@riogrande.ifrs.edu.br'];
+const DOMAIN          = '@riogrande.ifrs.edu.br';
 
-// E-mails admin
-const ADMIN_EMAILS = ['dex@riogrande.ifrs.edu.br','dppi@riogrande.ifrs.edu.br','den@riogrande.ifrs.edu.br'];
-const DOMAIN = '@riogrande.ifrs.edu.br';
-
-// ─── STATE ───────────────────────────────────────────────
-let currentUser = null;
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+let CU = null; // currentUser
 let isAdmin = false;
-let DATA = { coordenadores:[], segmentos:[], projetos:[], participantes:[], assiduidades:[] };
-let editTarget = {};
+let D = { coordenadores:[], segmentos:[], projetos:[], participantes:[], assiduidades:[] };
 let confirmCb = null;
 
-// ─── MESES ───────────────────────────────────────────────
-const MESES_LABEL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-function buildMeses(){
-  const meses = [];
-  for(let y=2026;y<=2028;y++){
-    const maxM = (y===2028)?4:12;
-    for(let m=1;m<=maxM;m++) meses.push({val:`${y}-${String(m).padStart(2,'0')}`,label:`${MESES_LABEL[m-1]} de ${y}`});
-  }
-  return meses;
+// ════════════════════════════════════════════════
+// MESES
+// ════════════════════════════════════════════════
+const MN = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+function meses(){
+  const r=[];
+  for(let y=2026;y<=2028;y++){const max=(y===2028)?4:12;for(let m=1;m<=max;m++)r.push({v:`${y}-${String(m).padStart(2,'0')}`,l:`${MN[m-1]} de ${y}`});}
+  return r;
 }
-function populateMesSelect(selId, defaultVal){
-  const sel = document.getElementById(selId);
-  if(!sel) return;
-  sel.innerHTML='';
-  buildMeses().forEach(m=>{
-    const o=document.createElement('option');
-    o.value=m.val; o.textContent=m.label;
-    sel.appendChild(o);
-  });
-  if(defaultVal) sel.value=defaultVal;
-  else{
-    const now=new Date();
-    sel.value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  }
+function mLabel(v){return meses().find(m=>m.v===v)?.l||v;}
+function fillMes(id){
+  const s=document.getElementById(id);if(!s)return;
+  const now=new Date();const cur=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  s.innerHTML='';
+  meses().forEach(m=>{const o=document.createElement('option');o.value=m.v;o.textContent=m.l;s.appendChild(o);});
+  s.value=cur;
 }
 
-// ─── LOADER / TOAST / CONFIRM ────────────────────────────
+// ════════════════════════════════════════════════
+// GOOGLE OAUTH
+// ════════════════════════════════════════════════
+function startGoogleLogin(){
+  // Aguarda GIS carregar
+  if(typeof google==='undefined'||!google.accounts){
+    toast('Carregando SDK Google, tente novamente.','info'); return;
+  }
+  google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: 'openid email profile',
+    callback: handleToken,
+  }).requestAccessToken();
+}
+
+async function handleToken(resp){
+  if(resp.error){showErr();return;}
+  try{
+    showLoader();
+    const ures = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{
+      headers:{Authorization:`Bearer ${resp.access_token}`}
+    });
+    const prof = await ures.json();
+    const email = (prof.email||'').toLowerCase();
+    if(!email.endsWith(DOMAIN)){hideLoader();showErr();return;}
+    const r = await api('login',{email,nome:prof.name,picture:prof.picture});
+    if(!r.ok){hideLoader();showErr();return;}
+    CU = {...r.user, picture:prof.picture};
+    isAdmin = ADMIN_EMAILS.includes(email);
+    await loadData();
+    hideLoader();
+    isAdmin ? enterAdmin() : enterCoord();
+  }catch(e){hideLoader();showErr();}
+}
+function showErr(){document.getElementById('login-err').classList.add('show');}
+
+// ════════════════════════════════════════════════
+// LOADER / TOAST / CONFIRM
+// ════════════════════════════════════════════════
+function showLoader(){document.getElementById('loader').classList.remove('hide');}
 function hideLoader(){document.getElementById('loader').classList.add('hide');}
+
 function toast(msg,type='info',dur=3500){
-  const c=document.getElementById('toast-container');
+  const icons={success:'✓',error:'✕',info:'i'};
   const t=document.createElement('div');
   t.className=`toast ${type}`;
-  t.textContent=msg;
-  c.appendChild(t);
+  t.innerHTML=`<div class="toast-ico">${icons[type]||'i'}</div><span>${msg}</span>`;
+  document.getElementById('toast-wrap').appendChild(t);
   setTimeout(()=>t.remove(),dur);
 }
-function confirm2(title,msg,okLabel='Confirmar',danger=true){
+
+function confirm2(title,msg,okLabel='Confirmar'){
   return new Promise(res=>{
     confirmCb=res;
-    document.getElementById('confirm-title').textContent=title;
-    document.getElementById('confirm-msg').textContent=msg;
-    const btn=document.getElementById('confirm-ok-btn');
-    btn.textContent=okLabel;
-    btn.className=`btn ${danger?'btn-danger':'btn-primary'}`;
-    document.getElementById('confirm-overlay').classList.add('open');
+    document.getElementById('c-title').textContent=title;
+    document.getElementById('c-msg').textContent=msg;
+    document.getElementById('c-ok').textContent=okLabel;
+    document.getElementById('confirm-ov').classList.add('open');
   });
 }
 function confirmResolve(v){
-  document.getElementById('confirm-overlay').classList.remove('open');
+  document.getElementById('confirm-ov').classList.remove('open');
   if(confirmCb){confirmCb(v);confirmCb=null;}
 }
 
-// ─── API ─────────────────────────────────────────────────
-async function api(action, payload={}){
-  try{
-    const fd=new FormData();
-    fd.append('action',action);
-    fd.append('payload',JSON.stringify(payload));
-    const r=await fetch(GAS_URL,{method:'POST',body:fd});
-    const j=await r.json();
-    if(j.error) throw new Error(j.error);
-    return j;
-  }catch(e){
-    toast('Erro de comunicação com o servidor.','error');
-    throw e;
-  }
+// ════════════════════════════════════════════════
+// API
+// ════════════════════════════════════════════════
+async function api(action,payload={}){
+  const fd=new FormData();
+  fd.append('action',action);
+  fd.append('payload',JSON.stringify(payload));
+  const r=await fetch(GAS_URL,{method:'POST',body:fd});
+  const j=await r.json();
+  if(j.error)throw new Error(j.error);
+  return j;
 }
-
 async function loadData(){
-  try{
-    const r=await api('getData');
-    DATA=r.data;
-  }catch(e){}
+  const r=await api('getData');
+  D=r.data;
 }
 
-// ─── LOGIN ───────────────────────────────────────────────
-async function doLogin(){
-  const email=document.getElementById('login-email').value.trim().toLowerCase();
-  const errEl=document.getElementById('login-error');
-  errEl.classList.remove('show');
-  if(!email.endsWith(DOMAIN)){errEl.classList.add('show');return;}
-
-  try{
-    document.getElementById('loader').classList.remove('hide');
-    const r=await api('login',{email});
-    if(!r.ok){errEl.classList.add('show');hideLoader();return;}
-    currentUser=r.user;
-    isAdmin=ADMIN_EMAILS.includes(email);
-    await loadData();
-    hideLoader();
-    if(isAdmin) showAdmin();
-    else showCoord();
-  }catch(e){hideLoader();errEl.classList.add('show');}
-}
-document.getElementById('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-
-function doLogout(){
-  currentUser=null; isAdmin=false;
-  showPage('page-login');
-  document.getElementById('login-email').value='';
-}
-
-function showAdmin(){
-  showPage('page-admin');
-  document.getElementById('admin-avatar').textContent=initials(currentUser.nome);
-  document.getElementById('admin-user-name').textContent=currentUser.nome;
-  document.getElementById('admin-user-email').textContent=currentUser.email;
-  populateMesSelect('conf-filter-mes');
-  renderAll();
-}
-function showCoord(){
-  showPage('page-coord');
-  document.getElementById('coord-avatar').textContent=initials(currentUser.nome);
-  document.getElementById('coord-user-name').textContent=currentUser.nome;
-  document.getElementById('coord-user-email').textContent=currentUser.email;
-  populateMesSelect('coord-mes');
-  renderCoordProjects();
-}
-
+// ════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ════════════════════════════════════════════════
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>{p.style.display='none';p.classList.remove('active');});
-  const p=document.getElementById(id);
-  p.style.display='flex';
-  p.classList.add('active');
-  if(id==='page-login') p.style.display='flex';
+  const p=document.getElementById(id);p.style.display='flex';p.classList.add('active');
 }
+function setAv(wid,name,pic){
+  const el=document.getElementById(wid);if(!el)return;
+  if(pic)el.innerHTML=`<img src="${pic}" alt=""/>`;
+  else el.textContent=(name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+}
+function enterAdmin(){
+  showPage('page-admin');
+  setAv('adm-av',CU.nome,CU.picture);
+  document.getElementById('adm-name').textContent=CU.nome;
+  document.getElementById('adm-email').textContent=CU.email;
+  fillMes('conf-mes');
+  renderMgmt();
+}
+function enterCoord(){
+  showPage('page-coord');
+  setAv('crd-av',CU.nome,CU.picture);
+  document.getElementById('crd-name').textContent=CU.nome;
+  document.getElementById('crd-email').textContent=CU.email;
+  fillMes('coord-mes');
+  renderCoordProjs();
+}
+function doLogout(){CU=null;isAdmin=false;showPage('page-login');document.getElementById('login-err').classList.remove('show');}
 
-function initials(name){return(name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();}
-
-// ─── TABS ────────────────────────────────────────────────
-function switchTab(page,tab){
-  document.querySelectorAll(`#page-${page} .tab-btn`).forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll(`#page-${page} .tab-panel`).forEach(p=>p.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  document.getElementById(`${page}-tab-${tab}`).classList.add('active');
-  if(tab==='conferencia') renderConferencia();
-}
-
-// ─── MODAIS ──────────────────────────────────────────────
-function openModal(id){
-  document.getElementById(id).classList.add('open');
-  if(id==='segmento-modal') populateSelect('segmento-coord', DATA.coordenadores,'id','nome');
-  if(id==='projeto-modal'){
-    populateSelect('projeto-coord', DATA.coordenadores,'id','nome');
-  }
-  if(id==='participante-modal') populateSelect('part-projeto', DATA.projetos,'id','titulo');
-}
-function closeModal(id){
-  document.getElementById(id).classList.remove('open');
-  editTarget={};
-}
-document.querySelectorAll('.modal-overlay').forEach(o=>{
-  o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);});
-});
-function populateSelect(selId, items, valKey, labelKey){
-  const sel=document.getElementById(selId);
-  if(!sel) return;
-  sel.innerHTML='<option value="">Selecione...</option>';
-  items.forEach(i=>{const o=document.createElement('option');o.value=i[valKey];o.textContent=i[labelKey];sel.appendChild(o);});
-}
-
-// ─── RENDERIZAÇÃO ADMIN ──────────────────────────────────
-function renderAll(){
-  renderCoordenadores();
-  renderSegmentos();
-  renderProjetos();
-  renderParticipantes();
-  renderConferencia();
-}
-
-function segBadge(s){
-  const m={Ensino:'badge-ensino',Pesquisa:'badge-pesquisa','Extensão':'badge-extensao','Indissociável':'badge-indissociavel'};
-  return `<span class="badge ${m[s]||''}">${s}</span>`;
-}
-
-function renderCoordenadores(){
-  const tb=document.getElementById('tb-coordenadores');
-  if(!DATA.coordenadores.length){tb.innerHTML=`<tr><td colspan="5"><div class="empty-state"><p>Nenhum coordenador cadastrado.</p></div></td></tr>`;return;}
-  tb.innerHTML=DATA.coordenadores.map(c=>`
-    <tr>
-      <td><strong>${c.nome}</strong></td>
-      <td>${c.email}</td>
-      <td>${(DATA.segmentos.filter(s=>s.coordId==c.id).map(s=>segBadge(s.nome)).join(' '))||'—'}</td>
-      <td><span class="badge badge-${c.status==='Ativo'?'ativo':'inativo'}">${c.status}</span></td>
-      <td><div class="td-actions">
-        <button class="btn-icon" onclick="editCoord('${c.id}')">✏️</button>
-        <button class="btn-icon" onclick="deleteCoord('${c.id}')">🗑️</button>
-      </div></td>
-    </tr>`).join('');
-}
-
-function renderSegmentos(){
-  const tb=document.getElementById('tb-segmentos');
-  if(!DATA.segmentos.length){tb.innerHTML=`<tr><td colspan="3"><div class="empty-state"><p>Nenhum segmento cadastrado.</p></div></td></tr>`;return;}
-  tb.innerHTML=DATA.segmentos.map(s=>{
-    const coord=DATA.coordenadores.find(c=>c.id==s.coordId);
-    return `<tr>
-      <td>${segBadge(s.nome)}</td>
-      <td>${coord?coord.nome:'—'}</td>
-      <td><div class="td-actions">
-        <button class="btn-icon" onclick="editSegmento('${s.id}')">✏️</button>
-        <button class="btn-icon" onclick="deleteSegmento('${s.id}')">🗑️</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-function renderProjetos(){
-  const tb=document.getElementById('tb-projetos');
-  if(!DATA.projetos.length){tb.innerHTML=`<tr><td colspan="5"><div class="empty-state"><p>Nenhum projeto cadastrado.</p></div></td></tr>`;return;}
-  tb.innerHTML=DATA.projetos.map(p=>{
-    const coord=DATA.coordenadores.find(c=>c.id==p.coordId);
-    return `<tr>
-      <td><strong>${p.titulo}</strong></td>
-      <td>${coord?coord.nome:'—'}</td>
-      <td>${segBadge(p.segmento)}</td>
-      <td><span class="badge badge-${p.status==='Ativo'?'ativo':'inativo'}">${p.status}</span></td>
-      <td><div class="td-actions">
-        <button class="btn-icon" onclick="editProjeto('${p.id}')">✏️</button>
-        <button class="btn-icon" onclick="deleteProjeto('${p.id}')">🗑️</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-function renderParticipantes(){
-  const tb=document.getElementById('tb-participantes');
-  if(!DATA.participantes.length){tb.innerHTML=`<tr><td colspan="5"><div class="empty-state"><p>Nenhum participante cadastrado.</p></div></td></tr>`;return;}
-  tb.innerHTML=DATA.participantes.map(p=>{
-    const proj=DATA.projetos.find(pr=>pr.id==p.projetoId);
-    const coord=proj?DATA.coordenadores.find(c=>c.id==proj.coordId):null;
-    return `<tr>
-      <td><strong>${p.nome}</strong></td>
-      <td><span class="badge badge-${p.tipo==='Bolsista'?'bolsista':'voluntario'}">${p.tipo}</span></td>
-      <td>${proj?proj.titulo:'—'}</td>
-      <td>${coord?coord.nome:'—'}</td>
-      <td><div class="td-actions">
-        <button class="btn-icon" onclick="editParticipante('${p.id}')">✏️</button>
-        <button class="btn-icon" onclick="deleteParticipante('${p.id}')">🗑️</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-function renderConferencia(){
-  const mes=document.getElementById('conf-filter-mes').value;
-  const seg=document.getElementById('conf-filter-segmento').value;
-  const cont=document.getElementById('conf-list');
-  let assids=DATA.assiduidades.filter(a=>a.mes===mes);
-  if(seg) assids=assids.filter(a=>{
-    const proj=DATA.projetos.find(p=>p.id==a.projetoId);
-    return proj&&proj.segmento===seg;
+// ════════════════════════════════════════════════
+// TABS ADMIN
+// ════════════════════════════════════════════════
+function adminTab(name){
+  ['ger','conf'].forEach(t=>{
+    document.getElementById(`tb-${t}`).classList.toggle('active',t===name);
+    document.getElementById(`panel-${t}`).classList.toggle('active',t===name);
   });
+  if(name==='conf') renderConf();
+}
+
+// ════════════════════════════════════════════════
+// MODAIS
+// ════════════════════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
+
+// ════════════════════════════════════════════════
+// INLINE FORMS
+// ════════════════════════════════════════════════
+function toggleIForm(id){const f=document.getElementById(id);if(!f)return;const open=f.classList.toggle('open');if(open)f.querySelector('input,select')?.focus();}
+function openIForm(id){const f=document.getElementById(id);if(f&&!f.classList.contains('open')){f.classList.add('open');setTimeout(()=>f.querySelector('input,select')?.focus(),50);}}
+function closeIForm(id){document.getElementById(id)?.classList.remove('open');}
+
+// ════════════════════════════════════════════════
+// HELPERS / BADGES
+// ════════════════════════════════════════════════
+const SBADGE={Ensino:'b-ensino',Pesquisa:'b-pesquisa','Extensão':'b-extensao','Indissociável':'b-indissociavel'};
+const SDOT={Ensino:'dot-Ensino',Pesquisa:'dot-Pesquisa','Extensão':'dot-Extensão','Indissociável':'dot-Indissociável'};
+function ini(n){return(n||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();}
+function sv(s){return s.replace(/'/g,'\\&#39;');}
+
+// ════════════════════════════════════════════════
+// GERENCIAMENTO — render
+// ════════════════════════════════════════════════
+function renderMgmt(){
+  const root=document.getElementById('mgmt-root');
+  if(!D.coordenadores.length){
+    root.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><h3>Nenhum coordenador</h3><p>Clique em "Adicionar Coordenador" abaixo.</p></div>`;
+    return;
+  }
+  root.innerHTML=D.coordenadores.map(c=>renderCoordCard(c)).join('');
+}
+
+function renderCoordCard(c){
+  const segs=D.segmentos.filter(s=>String(s.coordId)===String(c.id));
+  const tProj=D.projetos.filter(p=>segs.some(s=>String(s.id)===String(p.segId))).length;
+  return `
+<div class="coord-card" id="cc-${c.id}">
+  <div class="coord-head" id="ch-${c.id}" onclick="togCoord('${c.id}')">
+    <div class="coord-av">${ini(c.nome)}</div>
+    <div class="coord-info">
+      <strong>${c.nome}</strong>
+      <em>${c.email}</em>
+    </div>
+    <div class="coord-meta">
+      <span class="count-chip">${segs.length} seg · ${tProj} proj</span>
+      <span class="badge b-${c.status==='Ativo'?'ativo':'inativo'}">${c.status}</span>
+      <button class="icon-btn" onclick="event.stopPropagation();editCoord('${c.id}')" title="Editar"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
+      <button class="icon-btn" onclick="event.stopPropagation();delCoord('${c.id}')" title="Remover"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+    </div>
+    <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+  <div class="coord-body" id="cb-${c.id}">
+    ${segs.map(s=>renderSegBlock(s,c.id)).join('')}
+    <button class="add-btn" onclick="toggleIForm('iform-seg-${c.id}')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Adicionar Segmento
+    </button>
+    <div class="iform" id="iform-seg-${c.id}">
+      <div class="iform-row">
+        <div class="iform-field"><label>Segmento</label>
+          <select id="ns-tipo-${c.id}"><option>Ensino</option><option>Pesquisa</option><option>Extensão</option><option>Indissociável</option></select>
+        </div>
+      </div>
+      <div class="iform-actions">
+        <button class="btn btn-primary btn-sm" onclick="addSeg('${c.id}')">Adicionar</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeIForm('iform-seg-${c.id}')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+function renderSegBlock(s,coordId){
+  const projs=D.projetos.filter(p=>String(p.segId)===String(s.id));
+  return `
+<div class="seg-block" id="sb-${s.id}">
+  <div class="seg-head" id="sh-${s.id}" onclick="togSeg('${s.id}')">
+    <div class="seg-dot ${SDOT[s.nome]||''}"></div>
+    <div class="seg-info"><strong>${s.nome}</strong><em>${projs.length} projeto${projs.length!==1?'s':''}</em></div>
+    <div style="display:flex;align-items:center;gap:7px;margin-left:auto">
+      <button class="icon-btn" onclick="event.stopPropagation();editSeg('${s.id}')" title="Editar"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
+      <button class="icon-btn" onclick="event.stopPropagation();delSeg('${s.id}')" title="Remover"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="seg-body" id="sbody-${s.id}">
+    ${projs.map(p=>renderProjBlock(p,s.id,coordId)).join('')}
+    <button class="add-btn" onclick="toggleIForm('iform-proj-${s.id}')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Adicionar Projeto
+    </button>
+    <div class="iform" id="iform-proj-${s.id}">
+      <div class="iform-row">
+        <div class="iform-field" style="flex:2"><label>Título do projeto</label><input type="text" id="np-titulo-${s.id}" placeholder="Nome do projeto"/></div>
+        <div class="iform-field"><label>Status</label><select id="np-status-${s.id}"><option>Ativo</option><option>Inativo</option></select></div>
+      </div>
+      <div class="iform-actions">
+        <button class="btn btn-primary btn-sm" onclick="addProj('${s.id}','${coordId}')">Adicionar</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeIForm('iform-proj-${s.id}')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+function renderProjBlock(p,segId,coordId){
+  const parts=D.participantes.filter(pt=>String(pt.projetoId)===String(p.id));
+  return `
+<div class="proj-block" id="pb-${p.id}">
+  <div class="proj-head" id="ph-${p.id}" onclick="togProj('${p.id}')">
+    <div class="proj-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    <div class="proj-info">
+      <strong>${p.titulo}</strong>
+      <em>${parts.length} participante${parts.length!==1?'s':''} · <span class="badge b-${p.status==='Ativo'?'ativo':'inativo'}">${p.status}</span></em>
+    </div>
+    <div style="display:flex;align-items:center;gap:7px;margin-left:auto">
+      <button class="icon-btn" onclick="event.stopPropagation();editProj('${p.id}')" title="Editar"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
+      <button class="icon-btn" onclick="event.stopPropagation();delProj('${p.id}')" title="Remover"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="proj-body" id="pbody-${p.id}">
+    <div class="part-list" id="plist-${p.id}">
+      ${parts.length ? parts.map(renderPartRow).join('') : '<p style="font-size:12px;color:var(--text3);padding:5px 0">Nenhum participante ainda.</p>'}
+    </div>
+    <button class="add-btn" onclick="toggleIForm('iform-part-${p.id}')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Adicionar Bolsista / Voluntário
+    </button>
+    <div class="iform" id="iform-part-${p.id}">
+      <div class="iform-row">
+        <div class="iform-field" style="flex:2"><label>Nome</label><input type="text" id="npt-nome-${p.id}" placeholder="Nome completo"/></div>
+        <div class="iform-field"><label>Tipo</label><select id="npt-tipo-${p.id}"><option>Bolsista</option><option>Voluntário</option></select></div>
+      </div>
+      <div class="iform-actions">
+        <button class="btn btn-primary btn-sm" onclick="addPart('${p.id}')">Adicionar</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeIForm('iform-part-${p.id}')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+function renderPartRow(pt){
+  return `<div class="part-row" id="pr-${pt.id}">
+    <span class="part-row-name">${pt.nome}</span>
+    <span class="badge b-${pt.tipo==='Bolsista'?'bolsista':'voluntario'}">${pt.tipo}</span>
+    <div style="display:flex;gap:5px">
+      <button class="icon-btn" onclick="editPart('${pt.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
+      <button class="icon-btn" onclick="delPart('${pt.id}')" title="Remover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+    </div>
+  </div>`;
+}
+
+// ─── toggles ───────────────────────────────────
+function togCoord(id){
+  const body=document.getElementById(`cb-${id}`),head=document.getElementById(`ch-${id}`);
+  const chev=head.querySelector('.chev');
+  const open=body.classList.toggle('open');
+  head.classList.toggle('expanded',open);
+  chev.classList.toggle('open',open);
+}
+function togSeg(id){
+  const body=document.getElementById(`sbody-${id}`),head=document.getElementById(`sh-${id}`);
+  const chev=head.querySelector('.chev');
+  const open=body.classList.toggle('open');
+  head.classList.toggle('expanded',open);
+  chev.classList.toggle('open',open);
+}
+function togProj(id){
+  const body=document.getElementById(`pbody-${id}`),head=document.getElementById(`ph-${id}`);
+  const chev=head.querySelector('.chev');
+  const open=body.classList.toggle('open');
+  head.classList.toggle('expanded',open);
+  chev.classList.toggle('open',open);
+}
+
+// helper: reopen parents after re-render
+function reopenCoord(coordId){setTimeout(()=>{
+  const body=document.getElementById(`cb-${coordId}`);
+  const head=document.getElementById(`ch-${coordId}`);
+  if(body&&!body.classList.contains('open')){body.classList.add('open');head?.classList.add('expanded');head?.querySelector('.chev')?.classList.add('open');}
+},60);}
+function reopenSeg(segId){setTimeout(()=>{
+  const body=document.getElementById(`sbody-${segId}`);
+  const head=document.getElementById(`sh-${segId}`);
+  if(body&&!body.classList.contains('open')){body.classList.add('open');head?.classList.add('expanded');head?.querySelector('.chev')?.classList.add('open');}
+},60);}
+
+// ════════════════════════════════════════════════
+// CRUD COORDENADOR
+// ════════════════════════════════════════════════
+async function addCoord(){
+  const nome=document.getElementById('nc-nome').value.trim();
+  const email=document.getElementById('nc-email').value.trim().toLowerCase();
+  if(!nome||!email){toast('Preencha nome e e-mail.','error');return;}
+  if(!email.endsWith(DOMAIN)){toast('E-mail deve ser @riogrande.ifrs.edu.br','error');return;}
+  try{
+    const r=await api('saveCoord',{nome,email,status:'Ativo'});
+    D.coordenadores.push(r.item);
+    document.getElementById('nc-nome').value='';
+    document.getElementById('nc-email').value='';
+    closeIForm('iform-coord');
+    renderMgmt();
+    toast('Coordenador adicionado!','success');
+  }catch(e){toast(e.message,'error');}
+}
+function editCoord(id){
+  const c=D.coordenadores.find(x=>x.id==id);if(!c)return;
+  document.getElementById('ec-id').value=c.id;
+  document.getElementById('ec-nome').value=c.nome;
+  document.getElementById('ec-email').value=c.email;
+  document.getElementById('ec-status').value=c.status;
+  openModal('m-edit-coord');
+}
+async function saveEditCoord(){
+  const id=document.getElementById('ec-id').value;
+  const nome=document.getElementById('ec-nome').value.trim();
+  const email=document.getElementById('ec-email').value.trim().toLowerCase();
+  const status=document.getElementById('ec-status').value;
+  if(!nome||!email){toast('Preencha todos os campos.','error');return;}
+  try{
+    const r=await api('saveCoord',{id,nome,email,status});
+    const i=D.coordenadores.findIndex(x=>x.id==id);if(i>=0)D.coordenadores[i]=r.item;
+    closeModal('m-edit-coord');renderMgmt();toast('Coordenador atualizado.','success');
+  }catch(e){toast(e.message,'error');}
+}
+async function delCoord(id){
+  const ok=await confirm2('Remover Coordenador','Todos os segmentos, projetos e participantes vinculados serão removidos.','Remover');
+  if(!ok)return;
+  try{
+    await api('deleteCoord',{id});
+    D.coordenadores=D.coordenadores.filter(x=>x.id!=id);
+    D.segmentos=D.segmentos.filter(x=>x.coordId!=id);
+    D.projetos=D.projetos.filter(x=>x.coordId!=id);
+    D.participantes=D.participantes.filter(x=>!D.projetos.some(p=>p.id==x.projetoId&&p.coordId==id));
+    renderMgmt();toast('Coordenador removido.','success');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ════════════════════════════════════════════════
+// CRUD SEGMENTO
+// ════════════════════════════════════════════════
+async function addSeg(coordId){
+  const nome=document.getElementById(`ns-tipo-${coordId}`).value;
+  try{
+    const r=await api('saveSegmento',{nome,coordId});
+    D.segmentos.push(r.item);
+    closeIForm(`iform-seg-${coordId}`);
+    renderMgmt();
+    reopenCoord(coordId);
+    toast('Segmento adicionado!','success');
+  }catch(e){toast(e.message,'error');}
+}
+function editSeg(id){
+  const s=D.segmentos.find(x=>x.id==id);if(!s)return;
+  document.getElementById('es-id').value=s.id;
+  document.getElementById('es-nome').value=s.nome;
+  openModal('m-edit-seg');
+}
+async function saveEditSeg(){
+  const id=document.getElementById('es-id').value;
+  const nome=document.getElementById('es-nome').value;
+  try{
+    const r=await api('saveSegmento',{id,nome});
+    const i=D.segmentos.findIndex(x=>x.id==id);if(i>=0)D.segmentos[i]=r.item;
+    closeModal('m-edit-seg');renderMgmt();toast('Segmento atualizado.','success');
+  }catch(e){toast(e.message,'error');}
+}
+async function delSeg(id){
+  const seg=D.segmentos.find(x=>x.id==id);
+  const ok=await confirm2('Remover Segmento','Projetos e participantes vinculados também serão removidos.','Remover');
+  if(!ok)return;
+  try{
+    await api('deleteSegmento',{id});
+    D.segmentos=D.segmentos.filter(x=>x.id!=id);
+    renderMgmt();
+    if(seg)reopenCoord(seg.coordId);
+    toast('Segmento removido.','success');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ════════════════════════════════════════════════
+// CRUD PROJETO
+// ════════════════════════════════════════════════
+async function addProj(segId,coordId){
+  const titulo=document.getElementById(`np-titulo-${segId}`).value.trim();
+  const status=document.getElementById(`np-status-${segId}`).value;
+  if(!titulo){toast('Informe o título.','error');return;}
+  const seg=D.segmentos.find(s=>s.id==segId);
+  try{
+    const r=await api('saveProjeto',{titulo,segId,coordId,segmento:seg?.nome||'',status});
+    D.projetos.push(r.item);
+    document.getElementById(`np-titulo-${segId}`).value='';
+    closeIForm(`iform-proj-${segId}`);
+    renderMgmt();
+    reopenCoord(coordId);reopenSeg(segId);
+    toast('Projeto adicionado!','success');
+  }catch(e){toast(e.message,'error');}
+}
+function editProj(id){
+  const p=D.projetos.find(x=>x.id==id);if(!p)return;
+  document.getElementById('ep-id').value=p.id;
+  document.getElementById('ep-titulo').value=p.titulo;
+  document.getElementById('ep-status').value=p.status;
+  openModal('m-edit-proj');
+}
+async function saveEditProj(){
+  const id=document.getElementById('ep-id').value;
+  const titulo=document.getElementById('ep-titulo').value.trim();
+  const status=document.getElementById('ep-status').value;
+  if(!titulo){toast('Informe o título.','error');return;}
+  try{
+    const r=await api('saveProjeto',{id,titulo,status});
+    const i=D.projetos.findIndex(x=>x.id==id);if(i>=0)D.projetos[i]={...D.projetos[i],...r.item};
+    closeModal('m-edit-proj');renderMgmt();toast('Projeto atualizado.','success');
+  }catch(e){toast(e.message,'error');}
+}
+async function delProj(id){
+  const ok=await confirm2('Remover Projeto','Participantes vinculados também serão removidos.','Remover');
+  if(!ok)return;
+  try{
+    await api('deleteProjeto',{id});
+    const proj=D.projetos.find(x=>x.id==id);
+    D.projetos=D.projetos.filter(x=>x.id!=id);
+    D.participantes=D.participantes.filter(x=>x.projetoId!=id);
+    if(proj){renderMgmt();reopenCoord(proj.coordId);reopenSeg(proj.segId);}
+    else renderMgmt();
+    toast('Projeto removido.','success');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ════════════════════════════════════════════════
+// CRUD PARTICIPANTE
+// ════════════════════════════════════════════════
+async function addPart(projId){
+  const nome=document.getElementById(`npt-nome-${projId}`).value.trim();
+  const tipo=document.getElementById(`npt-tipo-${projId}`).value;
+  if(!nome){toast('Informe o nome.','error');return;}
+  try{
+    const r=await api('saveParticipante',{nome,tipo,projetoId:projId});
+    D.participantes.push(r.item);
+    document.getElementById(`npt-nome-${projId}`).value='';
+    closeIForm(`iform-part-${projId}`);
+    // Atualiza só a lista sem re-renderizar tudo
+    const listEl=document.getElementById(`plist-${projId}`);
+    if(listEl){
+      const parts=D.participantes.filter(p=>String(p.projetoId)===String(projId));
+      listEl.innerHTML=parts.map(renderPartRow).join('');
+    }
+    toast('Participante adicionado!','success');
+  }catch(e){toast(e.message,'error');}
+}
+function editPart(id){
+  const p=D.participantes.find(x=>x.id==id);if(!p)return;
+  document.getElementById('ept-id').value=p.id;
+  document.getElementById('ept-nome').value=p.nome;
+  document.getElementById('ept-tipo').value=p.tipo;
+  openModal('m-edit-part');
+}
+async function saveEditPart(){
+  const id=document.getElementById('ept-id').value;
+  const nome=document.getElementById('ept-nome').value.trim();
+  const tipo=document.getElementById('ept-tipo').value;
+  if(!nome){toast('Informe o nome.','error');return;}
+  try{
+    const r=await api('saveParticipante',{id,nome,tipo});
+    const i=D.participantes.findIndex(x=>x.id==id);
+    if(i>=0)D.participantes[i]={...D.participantes[i],...r.item};
+    closeModal('m-edit-part');
+    const el=document.getElementById(`pr-${id}`);
+    if(el)el.outerHTML=renderPartRow(D.participantes[i]);
+    toast('Participante atualizado.','success');
+  }catch(e){toast(e.message,'error');}
+}
+async function delPart(id){
+  const ok=await confirm2('Remover Participante','Esta ação não pode ser desfeita.','Remover');
+  if(!ok)return;
+  try{
+    await api('deleteParticipante',{id});
+    document.getElementById(`pr-${id}`)?.remove();
+    D.participantes=D.participantes.filter(x=>x.id!=id);
+    toast('Participante removido.','success');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ════════════════════════════════════════════════
+// CONFERÊNCIA
+// ════════════════════════════════════════════════
+function renderConf(){
+  const mes=document.getElementById('conf-mes')?.value;
+  const seg=document.getElementById('conf-seg')?.value;
+  const cont=document.getElementById('conf-list');if(!cont)return;
+  let assids=D.assiduidades.filter(a=>a.mes===mes);
+  if(seg)assids=assids.filter(a=>{const p=D.projetos.find(x=>x.id==a.projetoId);return p&&p.segmento===seg;});
   if(!assids.length){
-    cont.innerHTML=`<div class="empty-state">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <h3>Nenhuma assiduidade encontrada</h3>
-      <p>Nenhuma submissão para o período e filtro selecionados.</p>
-    </div>`;
+    cont.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><h3>Nenhuma assiduidade</h3><p>Nenhuma submissão para o período selecionado.</p></div>`;
     return;
   }
   cont.innerHTML=assids.map(a=>{
-    const proj=DATA.projetos.find(p=>p.id==a.projetoId)||{titulo:'Projeto desconhecido',segmento:'—'};
-    const coord=DATA.coordenadores.find(c=>c.id==proj.coordId)||{nome:'—'};
-    const parts=DATA.participantes.filter(p=>p.projetoId==a.projetoId);
-    const mesLabel=buildMeses().find(m=>m.val===a.mes)?.label||a.mes;
+    const proj=D.projetos.find(p=>p.id==a.projetoId)||{titulo:'—',segmento:'—'};
+    const coord=D.coordenadores.find(c=>c.id==proj.coordId)||{nome:'—'};
+    const parts=D.participantes.filter(p=>p.projetoId==a.projetoId);
     return `
-    <div class="conf-card">
-      <div class="conf-card-header" onclick="toggleConf('conf-body-${a.id}',this)">
-        <div class="conf-card-header-left">
-          <h4>${proj.titulo}</h4>
-          <p>${coord.nome} · ${segBadge(proj.segmento)} · ${mesLabel}</p>
-        </div>
-        <div class="conf-card-header-right">
-          <span class="badge badge-${a.status==='Validado'?'validado':'pendente'}">${a.status||'Pendente'}</span>
-          <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-      </div>
-      <div class="conf-card-body" id="conf-body-${a.id}">
-        ${parts.map(p=>{
-          const presente=a.presencas&&a.presencas[p.id];
-          return `<div class="conf-participant-row">
-            <div class="conf-participant-name">${p.nome} <span class="badge badge-${p.tipo==='Bolsista'?'bolsista':'voluntario'}" style="margin-left:6px">${p.tipo}</span></div>
-            <span class="conf-status-chip ${presente?'conf-status-present':'conf-status-absent'}">${presente?'Presente':'Ausente'}</span>
-          </div>`;
-        }).join('')}
-        ${a.observacoes?`<div class="conf-obs-box"><strong>Observações:</strong> ${a.observacoes}</div>`:''}
-        ${a.declaracao?`<div class="conf-decl">✓ Declaração de veracidade confirmada pelo coordenador</div>`:''}
-        <div class="conf-actions">
-          ${a.status!=='Validado'?`<button class="btn btn-sm btn-primary" onclick="validarAssid('${a.id}')">✓ Validar</button>`:''}
-          <button class="btn btn-sm btn-danger" onclick="solicitarCorrecao('${a.id}')">Solicitar Correção</button>
-        </div>
-      </div>
-    </div>`;
+<div class="conf-card">
+  <div class="conf-hd" onclick="togConf('ccd-${a.id}',this)">
+    <div><h4>${proj.titulo}</h4><p>${coord.nome} · <span class="badge ${SBADGE[proj.segmento]||''}">${proj.segmento}</span> · ${mLabel(a.mes)}</p></div>
+    <div style="display:flex;align-items:center;gap:9px">
+      <span class="badge b-${a.status==='Validado'?'validado':'pendente'}">${a.status||'Pendente'}</span>
+      <svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+  <div class="conf-bd" id="ccd-${a.id}">
+    ${parts.map(p=>{const pres=a.presencas&&a.presencas[p.id];
+      return `<div class="conf-prow">
+        <span style="font-size:13px;font-weight:500">${p.nome} <span class="badge b-${p.tipo==='Bolsista'?'bolsista':'voluntario'}" style="margin-left:4px">${p.tipo}</span></span>
+        <span class="conf-chip ${pres?'chip-yes':'chip-no'}">${pres?'Presente':'Ausente'}</span>
+      </div>`;}).join('')}
+    ${a.observacoes?`<div class="conf-obs"><strong>Observações:</strong> ${a.observacoes}</div>`:''}
+    ${a.declaracao?`<div class="conf-decl"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Declaração confirmada</div>`:''}
+    <div class="conf-acts">
+      ${a.status!=='Validado'?`<button class="btn btn-primary btn-sm" onclick="validarAssid('${a.id}')">✓ Validar</button>`:''}
+      <button class="btn btn-ghost btn-sm" onclick="solicitarCorrecao('${a.id}')">Solicitar Correção</button>
+    </div>
+  </div>
+</div>`;
   }).join('');
 }
-
-function toggleConf(bodyId,header){
-  const body=document.getElementById(bodyId);
-  const chev=header.querySelector('.chevron');
-  body.classList.toggle('open');
-  chev.classList.toggle('open');
+function togConf(bodyId,head){
+  const b=document.getElementById(bodyId),c=head.querySelector('.chev');
+  b.classList.toggle('open');c.classList.toggle('open');
 }
-
 async function validarAssid(id){
-  const ok=await confirm2('Validar assiduidade','Confirmar validação desta assiduidade?','Validar',false);
-  if(!ok) return;
-  try{
-    await api('validarAssid',{id});
-    const a=DATA.assiduidades.find(x=>x.id==id);
-    if(a) a.status='Validado';
-    renderConferencia();
-    toast('Assiduidade validada.','success');
-  }catch(e){}
+  const ok=await confirm2('Validar Assiduidade','Confirmar validação?','Validar');
+  if(!ok)return;
+  try{await api('validarAssid',{id});const a=D.assiduidades.find(x=>x.id==id);if(a)a.status='Validado';renderConf();toast('Assiduidade validada.','success');}
+  catch(e){toast(e.message,'error');}
 }
-
 async function solicitarCorrecao(id){
-  const ok=await confirm2('Solicitar Correção','Enviar e-mail ao coordenador solicitando correção desta assiduidade?','Enviar E-mail',false);
-  if(!ok) return;
-  try{
-    await api('solicitarCorrecao',{id});
-    toast('E-mail de solicitação enviado.','success');
-  }catch(e){}
+  const ok=await confirm2('Solicitar Correção','Enviar e-mail ao coordenador?','Enviar');
+  if(!ok)return;
+  try{await api('solicitarCorrecao',{id});toast('E-mail enviado.','success');}
+  catch(e){toast(e.message,'error');}
 }
 
-// ─── CRUD COORD ──────────────────────────────────────────
-function editCoord(id){
-  const c=DATA.coordenadores.find(x=>x.id==id);
-  if(!c) return;
-  document.getElementById('coord-modal-title').textContent='Editar Coordenador';
-  document.getElementById('coord-edit-id').value=c.id;
-  document.getElementById('coord-nome').value=c.nome;
-  document.getElementById('coord-email').value=c.email;
-  document.getElementById('coord-status').value=c.status;
-  openModal('coord-modal');
-}
-async function saveCoord(){
-  const id=document.getElementById('coord-edit-id').value;
-  const nome=document.getElementById('coord-nome').value.trim();
-  const email=document.getElementById('coord-email').value.trim().toLowerCase();
-  const status=document.getElementById('coord-status').value;
-  if(!nome||!email){toast('Preencha todos os campos.','error');return;}
-  if(!email.endsWith(DOMAIN)){toast('E-mail deve ser @riogrande.ifrs.edu.br','error');return;}
-  try{
-    const r=await api('saveCoord',{id,nome,email,status});
-    if(id) {const idx=DATA.coordenadores.findIndex(x=>x.id==id);if(idx>=0)DATA.coordenadores[idx]=r.item;}
-    else DATA.coordenadores.push(r.item);
-    renderCoordenadores();
-    closeModal('coord-modal');
-    toast(id?'Coordenador atualizado.':'Coordenador cadastrado.','success');
-  }catch(e){}
-}
-async function deleteCoord(id){
-  const ok=await confirm2('Remover Coordenador','Esta ação não pode ser desfeita.');
-  if(!ok) return;
-  try{
-    await api('deleteCoord',{id});
-    DATA.coordenadores=DATA.coordenadores.filter(x=>x.id!=id);
-    renderCoordenadores();
-    toast('Coordenador removido.','success');
-  }catch(e){}
-}
-
-// ─── CRUD SEGMENTO ───────────────────────────────────────
-function editSegmento(id){
-  const s=DATA.segmentos.find(x=>x.id==id);
-  if(!s) return;
-  document.getElementById('segmento-modal-title').textContent='Editar Segmento';
-  document.getElementById('segmento-edit-id').value=s.id;
-  openModal('segmento-modal');
-  setTimeout(()=>{
-    document.getElementById('segmento-nome').value=s.nome;
-    document.getElementById('segmento-coord').value=s.coordId;
-  },50);
-}
-async function saveSegmento(){
-  const id=document.getElementById('segmento-edit-id').value;
-  const nome=document.getElementById('segmento-nome').value;
-  const coordId=document.getElementById('segmento-coord').value;
-  if(!coordId){toast('Selecione um coordenador.','error');return;}
-  try{
-    const r=await api('saveSegmento',{id,nome,coordId});
-    if(id){const idx=DATA.segmentos.findIndex(x=>x.id==id);if(idx>=0)DATA.segmentos[idx]=r.item;}
-    else DATA.segmentos.push(r.item);
-    renderSegmentos();
-    closeModal('segmento-modal');
-    toast('Segmento salvo.','success');
-  }catch(e){}
-}
-async function deleteSegmento(id){
-  const ok=await confirm2('Remover Segmento','Esta ação não pode ser desfeita.');
-  if(!ok) return;
-  try{
-    await api('deleteSegmento',{id});
-    DATA.segmentos=DATA.segmentos.filter(x=>x.id!=id);
-    renderSegmentos();
-    toast('Segmento removido.','success');
-  }catch(e){}
-}
-
-// ─── CRUD PROJETO ────────────────────────────────────────
-function editProjeto(id){
-  const p=DATA.projetos.find(x=>x.id==id);
-  if(!p) return;
-  document.getElementById('projeto-modal-title').textContent='Editar Projeto';
-  document.getElementById('projeto-edit-id').value=p.id;
-  openModal('projeto-modal');
-  setTimeout(()=>{
-    document.getElementById('projeto-titulo').value=p.titulo;
-    document.getElementById('projeto-coord').value=p.coordId;
-    document.getElementById('projeto-segmento').value=p.segmento;
-    document.getElementById('projeto-status').value=p.status;
-  },50);
-}
-async function saveProjeto(){
-  const id=document.getElementById('projeto-edit-id').value;
-  const titulo=document.getElementById('projeto-titulo').value.trim();
-  const coordId=document.getElementById('projeto-coord').value;
-  const segmento=document.getElementById('projeto-segmento').value;
-  const status=document.getElementById('projeto-status').value;
-  if(!titulo||!coordId){toast('Preencha todos os campos.','error');return;}
-  try{
-    const r=await api('saveProjeto',{id,titulo,coordId,segmento,status});
-    if(id){const idx=DATA.projetos.findIndex(x=>x.id==id);if(idx>=0)DATA.projetos[idx]=r.item;}
-    else DATA.projetos.push(r.item);
-    renderProjetos();
-    closeModal('projeto-modal');
-    toast('Projeto salvo.','success');
-  }catch(e){}
-}
-async function deleteProjeto(id){
-  const ok=await confirm2('Remover Projeto','Esta ação não pode ser desfeita.');
-  if(!ok) return;
-  try{
-    await api('deleteProjeto',{id});
-    DATA.projetos=DATA.projetos.filter(x=>x.id!=id);
-    renderProjetos();
-    toast('Projeto removido.','success');
-  }catch(e){}
-}
-
-// ─── CRUD PARTICIPANTE ───────────────────────────────────
-function editParticipante(id){
-  const p=DATA.participantes.find(x=>x.id==id);
-  if(!p) return;
-  document.getElementById('part-modal-title').textContent='Editar Participante';
-  document.getElementById('part-edit-id').value=p.id;
-  openModal('participante-modal');
-  setTimeout(()=>{
-    document.getElementById('part-nome').value=p.nome;
-    document.getElementById('part-tipo').value=p.tipo;
-    document.getElementById('part-projeto').value=p.projetoId;
-  },50);
-}
-async function saveParticipante(){
-  const id=document.getElementById('part-edit-id').value;
-  const nome=document.getElementById('part-nome').value.trim();
-  const tipo=document.getElementById('part-tipo').value;
-  const projetoId=document.getElementById('part-projeto').value;
-  if(!nome||!projetoId){toast('Preencha todos os campos.','error');return;}
-  try{
-    const r=await api('saveParticipante',{id,nome,tipo,projetoId});
-    if(id){const idx=DATA.participantes.findIndex(x=>x.id==id);if(idx>=0)DATA.participantes[idx]=r.item;}
-    else DATA.participantes.push(r.item);
-    renderParticipantes();
-    closeModal('participante-modal');
-    toast('Participante salvo.','success');
-  }catch(e){}
-}
-async function deleteParticipante(id){
-  const ok=await confirm2('Remover Participante','Esta ação não pode ser desfeita.');
-  if(!ok) return;
-  try{
-    await api('deleteParticipante',{id});
-    DATA.participantes=DATA.participantes.filter(x=>x.id!=id);
-    renderParticipantes();
-    toast('Participante removido.','success');
-  }catch(e){}
-}
-
-// ─── ÁREA COORDENADOR ────────────────────────────────────
-function renderCoordProjects(){
-  const mes=document.getElementById('coord-mes').value;
-  const mesProjetos=DATA.projetos.filter(p=>p.coordId==currentUser.id&&p.status==='Ativo');
-  const cont=document.getElementById('coord-projects-list');
-  if(!mesProjetos.length){
-    cont.innerHTML=`<div class="empty-state">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <h3>Nenhum projeto ativo</h3>
-      <p>Você não possui projetos ativos no momento.</p>
-    </div>`;
-    updateSubmitBar();
-    return;
+// ════════════════════════════════════════════════
+// COORD — ASSIDUIDADE
+// ════════════════════════════════════════════════
+function renderCoordProjs(){
+  const mes=document.getElementById('coord-mes')?.value;
+  const cont=document.getElementById('coord-projs');if(!cont)return;
+  const myProjs=D.projetos.filter(p=>String(p.coordId)===String(CU?.id)&&p.status==='Ativo');
+  if(!myProjs.length){
+    cont.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><h3>Nenhum projeto ativo</h3><p>Você não possui projetos ativos no momento.</p></div>`;
+    updateSubmit();return;
   }
-  const mesLabel=buildMeses().find(m=>m.val===mes)?.label||mes;
-  cont.innerHTML=mesProjetos.map(proj=>{
-    const parts=DATA.participantes.filter(p=>p.projetoId==proj.id);
-    const existente=DATA.assiduidades.find(a=>a.projetoId==proj.id&&a.mes===mes);
-    const readonly=!!existente;
+  cont.innerHTML=myProjs.map(proj=>{
+    const parts=D.participantes.filter(p=>String(p.projetoId)===String(proj.id));
+    const sent=D.assiduidades.find(a=>String(a.projetoId)===String(proj.id)&&a.mes===mes);
+    const ro=!!sent;
     return `
-    <div class="project-card" id="pcard-${proj.id}">
-      <div class="project-card-header">
-        <div>
-          <div class="project-card-title">${proj.titulo}</div>
-          <div class="project-card-meta">${segBadge(proj.segmento)} · ${mesLabel}${readonly?' · <span style="color:var(--success);font-weight:600">✓ Já enviado</span>':''}</div>
-        </div>
-        ${readonly?`<span class="badge badge-validado">Enviado</span>`:''}
-      </div>
-      <div class="project-card-body">
-        <div class="participants-list">
-          ${parts.length?parts.map(p=>`
-            <div class="participant-row">
-              <input type="checkbox" class="participant-cb" id="cb-${proj.id}-${p.id}"
-                ${readonly?(existente.presencas&&existente.presencas[p.id]?'checked':'')+' disabled':''}
-                onchange="updateSubmitBar()">
-              <label for="cb-${proj.id}-${p.id}" class="participant-name" style="cursor:pointer">${p.nome}</label>
-              <span class="badge badge-${p.tipo==='Bolsista'?'bolsista':'voluntario'}">${p.tipo}</span>
-            </div>`).join('')
-          :`<p style="color:var(--text3);font-size:14px;padding:12px 0">Nenhum participante neste projeto.</p>`}
-        </div>
-        <div class="obs-area">
-          <label>Observações (opcional)</label>
-          <textarea id="obs-${proj.id}" placeholder="Registre observações sobre este período..." ${readonly?'disabled':''}>${readonly?(existente.observacoes||''):''}</textarea>
-        </div>
-        <label class="declaracao-wrap">
-          <input type="checkbox" id="decl-${proj.id}" ${readonly?(existente.declaracao?'checked':'')+' disabled':''}
-            onchange="updateSubmitBar()">
-          <span class="declaracao-text">
-            <strong>Declaração de veracidade:</strong> Declaro que as informações de assiduidade registradas acima são verdadeiras e de minha responsabilidade como coordenador do projeto.
-          </span>
-        </label>
-      </div>
-    </div>`;
+<div class="passid-card">
+  <div class="passid-hd">
+    <div><h3>${proj.titulo}</h3><p><span class="badge ${SBADGE[proj.segmento]||''}">${proj.segmento}</span> · ${mLabel(mes)}</p></div>
+    ${ro?`<span class="sent-chip"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Enviado</span>`:''}
+  </div>
+  <div class="passid-bd">
+    ${parts.length ? parts.map(p=>`
+      <div class="pcheck-row">
+        <input type="checkbox" id="pck-${proj.id}-${p.id}"
+          ${ro?(sent.presencas&&sent.presencas[p.id]?'checked':'')+' disabled':''}
+          onchange="updateSubmit()"/>
+        <label for="pck-${proj.id}-${p.id}">${p.nome}</label>
+        <span class="badge b-${p.tipo==='Bolsista'?'bolsista':'voluntario'}">${p.tipo}</span>
+      </div>`).join('')
+    :`<p style="font-size:13px;color:var(--text3);padding:7px 0">Nenhum participante cadastrado.</p>`}
+    <div class="obs-field">
+      <label>Observações (opcional)</label>
+      <textarea id="obs-${proj.id}" ${ro?'disabled':''}>${ro?(sent.observacoes||''):''}</textarea>
+    </div>
+    <label class="decl-wrap" style="${ro?'opacity:.7;cursor:default':''}">
+      <input type="checkbox" id="decl-${proj.id}" ${ro?(sent.declaracao?'checked':'')+' disabled':''} onchange="updateSubmit()"/>
+      <span class="decl-text"><strong>Declaração de veracidade:</strong> Declaro que as informações de assiduidade são verdadeiras e de minha responsabilidade como coordenador do projeto.</span>
+    </label>
+  </div>
+</div>`;
   }).join('');
-  updateSubmitBar();
+  updateSubmit();
 }
 
-function updateSubmitBar(){
-  const mes=document.getElementById('coord-mes').value;
-  const mesProjetos=DATA.projetos.filter(p=>p.coordId==currentUser.id&&p.status==='Ativo');
-  const pendentes=mesProjetos.filter(p=>!DATA.assiduidades.find(a=>a.projetoId==p.id&&a.mes===mes));
-  const total=pendentes.length;
-  const comDecl=pendentes.filter(p=>document.getElementById(`decl-${p.id}`)?.checked).length;
-  document.getElementById('submit-summary').textContent=
-    `${comDecl} de ${total} projeto(s) pendente(s) prontos para envio`;
-  document.getElementById('btn-submit-all').disabled=(comDecl===0||total===0);
+function updateSubmit(){
+  const mes=document.getElementById('coord-mes')?.value;
+  const myProjs=D.projetos.filter(p=>String(p.coordId)===String(CU?.id)&&p.status==='Ativo');
+  const pending=myProjs.filter(p=>!D.assiduidades.find(a=>String(a.projetoId)===String(p.id)&&a.mes===mes));
+  const ready=pending.filter(p=>document.getElementById(`decl-${p.id}`)?.checked);
+  document.getElementById('sub-summary').textContent=`${ready.length} de ${pending.length} projeto(s) pronto${ready.length!==1?'s':''} para envio — `;
+  document.getElementById('btn-submit').disabled=(ready.length===0);
 }
 
 async function submitAll(){
   const mes=document.getElementById('coord-mes').value;
-  const mesProjetos=DATA.projetos.filter(p=>p.coordId==currentUser.id&&p.status==='Ativo');
-  const pendentes=mesProjetos.filter(p=>!DATA.assiduidades.find(a=>a.projetoId==p.id&&a.mes===mes));
-  const prontos=pendentes.filter(p=>document.getElementById(`decl-${p.id}`)?.checked);
-  if(!prontos.length){toast('Confirme a declaração de pelo menos um projeto.','error');return;}
-  const ok=await confirm2('Enviar Assiduidade',`Enviar assiduidade de ${prontos.length} projeto(s) para ${buildMeses().find(m=>m.val===mes)?.label}? Esta ação não pode ser desfeita.`,'Enviar',false);
-  if(!ok) return;
-  document.getElementById('btn-submit-all').disabled=true;
+  const myProjs=D.projetos.filter(p=>String(p.coordId)===String(CU?.id)&&p.status==='Ativo');
+  const pending=myProjs.filter(p=>!D.assiduidades.find(a=>String(a.projetoId)===String(p.id)&&a.mes===mes));
+  const ready=pending.filter(p=>document.getElementById(`decl-${p.id}`)?.checked);
+  if(!ready.length){toast('Confirme a declaração de pelo menos um projeto.','error');return;}
+  const ok=await confirm2('Enviar Assiduidade',`Enviar ${ready.length} projeto(s) para ${mLabel(mes)}? Não será possível reenviar.`,'Enviar');
+  if(!ok)return;
+  document.getElementById('btn-submit').disabled=true;
   try{
-    for(const proj of prontos){
-      const parts=DATA.participantes.filter(p=>p.projetoId==proj.id);
+    for(const proj of ready){
+      const parts=D.participantes.filter(p=>String(p.projetoId)===String(proj.id));
       const presencas={};
-      parts.forEach(p=>{presencas[p.id]=!!document.getElementById(`cb-${proj.id}-${p.id}`)?.checked;});
+      parts.forEach(p=>{presencas[p.id]=!!document.getElementById(`pck-${proj.id}-${p.id}`)?.checked;});
       const obs=document.getElementById(`obs-${proj.id}`)?.value||'';
-      const r=await api('submitAssid',{projetoId:proj.id,mes,presencas,observacoes:obs,declaracao:true,coordId:currentUser.id});
-      DATA.assiduidades.push(r.item);
+      const r=await api('submitAssid',{projetoId:proj.id,mes,presencas,observacoes:obs,declaracao:true,coordId:CU.id});
+      D.assiduidades.push({...r.item,presencas,declaracao:true});
     }
-    renderCoordProjects();
-    toast(`Assiduidade enviada com sucesso!`,'success');
+    renderCoordProjs();
+    toast('Assiduidade enviada com sucesso!','success');
   }catch(e){
-    document.getElementById('btn-submit-all').disabled=false;
+    toast(e.message||'Erro ao enviar.','error');
+    document.getElementById('btn-submit').disabled=false;
   }
 }
 
-// ─── DOTS DECORATION ─────────────────────────────────────
-(function(){
-  const c=document.getElementById('loginDots');
-  for(let i=0;i<12;i++){
-    const s=document.createElement('span');
-    const sz=Math.random()*180+60;
-    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${Math.random()*.12+.04}`;
-    c.appendChild(s);
-  }
-})();
-
-// ─── INIT ────────────────────────────────────────────────
-window.addEventListener('load',()=>{
-  hideLoader();
-  showPage('page-login');
-});
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+window.addEventListener('load',()=>{hideLoader();showPage('page-login');});
 </script>
 </body>
 </html>
