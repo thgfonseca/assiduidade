@@ -683,12 +683,15 @@ function doLogout(){CU=null;isAdmin=false;showPage('page-login');document.getEle
 // ════════════════════════════════════════════════
 // TABS ADMIN
 // ════════════════════════════════════════════════
-function adminTab(name){
+async function adminTab(name){
   ['ger','conf'].forEach(t=>{
     document.getElementById(`tb-${t}`).classList.toggle('active',t===name);
     document.getElementById(`panel-${t}`).classList.toggle('active',t===name);
   });
-  if(name==='conf') renderConf();
+  if(name==='conf'){
+    try{showLoader();await loadData();hideLoader();}catch(e){hideLoader();}
+    renderConf();
+  }
 }
 
 // ════════════════════════════════════════════════
@@ -1025,11 +1028,12 @@ async function delPart(id){
 // CONFERÊNCIA
 // ════════════════════════════════════════════════
 function renderConf(){
-  const mes=document.getElementById('conf-mes')?.value;
-  const seg=document.getElementById('conf-seg')?.value;
+  const mes=(document.getElementById('conf-mes')?.value||'').trim();
+  const seg=(document.getElementById('conf-seg')?.value||'').trim();
   const cont=document.getElementById('conf-list');if(!cont)return;
-  let assids=D.assiduidades.filter(a=>a.mes===mes);
-  if(seg)assids=assids.filter(a=>{const p=D.projetos.find(x=>x.id==a.projetoId);return p&&p.segmento===seg;});
+  console.log('[Conf] mes=',mes,'total assids=',D.assiduidades.length, D.assiduidades.map(a=>a.mes));
+  let assids=D.assiduidades.filter(a=>String(a.mes).trim()===mes);
+  if(seg)assids=assids.filter(a=>{const p=D.projetos.find(x=>String(x.id)===String(a.projetoId));return p&&p.segmento===seg;});
   if(!assids.length){
     cont.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><h3>Nenhuma assiduidade</h3><p>Nenhuma submissão para o período selecionado.</p></div>`;
     return;
