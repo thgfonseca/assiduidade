@@ -240,6 +240,8 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
 .conf-chip{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Sora',sans-serif}
 .chip-yes{background:#E8F7EF;color:#1A7F4B}
 .chip-no{background:#FDECEA;color:#C0392B}
+.chip-parcial{background:#FEF3C7;color:#B45309}
+.chip-subv{background:#F3E8FF;color:#7C3AED}
 .conf-obs{background:var(--bg);border-radius:8px;padding:9px 13px;margin-top:11px;font-size:13px;color:var(--text2);line-height:1.5}
 .conf-decl{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:12px;color:var(--success);font-weight:600}
 .conf-decl svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
@@ -257,10 +259,26 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
 .passid-hd h3{font-size:14px;font-weight:700;color:var(--blue-d)}
 .passid-hd p{font-size:12px;color:var(--text3);margin-top:2px}
 .passid-bd{padding:16px 20px}
-.pcheck-row{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border)}
-.pcheck-row:last-of-type{border-bottom:none}
-.pcheck-row input[type=checkbox]{width:19px;height:19px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
-.pcheck-row label{flex:1;font-size:14px;font-weight:500;cursor:pointer}
+.part-status-table{width:100%;border-collapse:collapse;margin-bottom:4px}
+.part-status-table th{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:7px 10px 7px 0;border-bottom:2px solid var(--border);white-space:nowrap}
+.part-status-table th:first-child{min-width:160px}
+.part-status-table td{padding:10px 10px 10px 0;border-bottom:1px solid var(--border);vertical-align:middle}
+.part-status-table tr:last-child td{border-bottom:none}
+.part-name-cell{font-size:13px;font-weight:600;color:var(--text)}
+.part-name-cell em{display:block;font-style:normal;font-size:11px;color:var(--text3);margin-top:1px}
+.btn-group{display:flex;gap:4px;flex-wrap:wrap}
+.sg-btn{border:1.5px solid var(--border);background:#fff;border-radius:7px;padding:5px 10px;font-size:12px;font-weight:600;font-family:'Sora',sans-serif;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.sg-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
+.sg-btn.sel-presente{background:#E8F7EF;border-color:#1A7F4B;color:#1A7F4B}
+.sg-btn.sel-ausente{background:#FDECEA;border-color:#C0392B;color:#C0392B}
+.sg-btn.sel-parcial{background:#FEF3C7;border-color:#B45309;color:#B45309}
+.sg-btn.sel-sim{background:#E8F7EF;border-color:#1A7F4B;color:#1A7F4B}
+.sg-btn.sel-nao{background:#FDECEA;border-color:#C0392B;color:#C0392B}
+.sg-btn.sel-sub-b{background:var(--blue-p);border-color:var(--blue);color:var(--blue-d)}
+.sg-btn.sel-sub-v{background:#F3E8FF;border-color:#7C3AED;color:#7C3AED}
+.sg-btn.sel-deslig{background:#FDECEA;border-color:#C0392B;color:#C0392B}
+.sg-btn.sel-naoh{background:#E8F7EF;border-color:#1A7F4B;color:#1A7F4B}
+.sg-btn:disabled{opacity:.35;cursor:not-allowed}
 .obs-field{margin:14px 0}
 .obs-field label{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
 .obs-field textarea{width:100%;border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:#fff;outline:none;resize:vertical;min-height:78px;transition:border-color .2s}
@@ -1086,18 +1104,35 @@ function renderConf(){
     </div>
   </div>
   <!-- Participantes -->
-  <div style="padding:4px 16px 12px">
-    ${parts.length?parts.map(p=>{
-      let chipCls='',chipLabel='';
-      if(!enviado){chipCls='';chipLabel='Não enviado';}
-      else{const pres=assid.presencas&&assid.presencas[String(p.id)];chipCls=pres?'chip-yes':'chip-no';chipLabel=pres?'Presente':'Ausente';}
-      return `<div class="conf-prow">
-        <span style="font-size:13px;font-weight:500">${p.nome} <span class="badge b-${p.tipo==='Bolsista'?'bolsista':'voluntario'}" style="margin-left:4px">${p.tipo}</span></span>
-        <span class="conf-chip ${chipCls}" style="${!enviado?'background:#F3F4F6;color:#6B7280':''}">${chipLabel}</span>
-      </div>`;
-    }).join(''):`<p style="font-size:12px;color:var(--text3);padding:8px 0">Nenhum participante cadastrado.</p>`}
-    ${enviado&&assid.observacoes?`<div class="conf-obs" style="margin-top:8px"><strong>Observações:</strong> ${assid.observacoes}</div>`:''}
-    ${enviado&&assid.declaracao?`<div class="conf-decl"><svg viewBox="0 0 24 24" width="13" height="13"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg> Declaração de veracidade confirmada</div>`:''}
+  <div style="padding:4px 16px 12px;overflow-x:auto">
+    ${parts.length?`
+    <table style="width:100%;border-collapse:collapse;margin-top:6px;min-width:560px">
+      <thead><tr>
+        <th style="text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:6px 10px 6px 0;border-bottom:2px solid var(--border)">Participante</th>
+        <th style="text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:6px 10px 6px 0;border-bottom:2px solid var(--border)">Presença</th>
+        <th style="text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:6px 10px 6px 0;border-bottom:2px solid var(--border)">Cumpriu atividades</th>
+        <th style="text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:6px 0;border-bottom:2px solid var(--border)">Substituição / Desligamento</th>
+      </tr></thead>
+      <tbody>${parts.map(p=>{
+        const pd=enviado&&assid.presencas?assid.presencas[String(p.id)]:{};
+        const pres=pd?.presenca||'';
+        const cum=pd?.cumpriu||'';
+        const sub=pd?.subst||'';
+        const isAus=pres==='Ausente';
+        const presColor={Presente:'#E8F7EF;color:#1A7F4B',Ausente:'#FDECEA;color:#C0392B',Parcial:'#FEF3C7;color:#B45309'}[pres]||'#F3F4F6;color:#6B7280';
+        const cumColor=isAus?'#F3F4F6;color:#9C8270':{Sim:'#E8F7EF;color:#1A7F4B','Não':'#FDECEA;color:#C0392B'}[cum]||'#F3F4F6;color:#6B7280';
+        const subColor={'Não houve':'#E8F7EF;color:#1A7F4B','Sub. Bolsista':'#EBF0FF;color:#1240A8','Sub. Voluntário':'#F3E8FF;color:#7C3AED','Desligamento':'#FDECEA;color:#C0392B'}[sub]||'#F3F4F6;color:#6B7280';
+        return `<tr>
+          <td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;vertical-align:middle">${p.nome}<br><span class="badge b-${p.tipo==='Bolsista'?'bolsista':'voluntario'}" style="margin-top:3px">${p.tipo}</span></td>
+          <td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);vertical-align:middle"><span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${presColor}">${enviado?(pres||'—'):'Não enviado'}</span></td>
+          <td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);vertical-align:middle"><span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${cumColor}">${enviado?(isAus?'—':(cum||'—')):'—'}</span></td>
+          <td style="padding:9px 0;border-bottom:1px solid var(--border);vertical-align:middle"><span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${subColor}">${enviado?(sub||'—'):'—'}</span></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`
+    :`<p style="font-size:12px;color:var(--text3);padding:8px 0">Nenhum participante cadastrado.</p>`}
+    ${enviado&&assid.observacoes?`<div class="conf-obs" style="margin-top:10px"><strong>Observações:</strong> ${assid.observacoes}</div>`:''}
+    ${enviado&&assid.declaracao?`<div class="conf-decl" style="margin-top:8px"><svg viewBox="0 0 24 24" width="13" height="13"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg> Declaração de veracidade confirmada</div>`:''}
   </div>
 </div>`;
     }).join('')}
@@ -1124,7 +1159,75 @@ async function validarAssid(id){
 // ════════════════════════════════════════════════
 // COORD — ASSIDUIDADE
 // ════════════════════════════════════════════════
+// Status options
+const OPT_PRESENCA    = ['Presente','Ausente','Parcial'];
+const OPT_CUMPRIU     = ['Sim','Não'];
+const OPT_SUBSTITUICAO= ['Não houve','Sub. Bolsista','Sub. Voluntário','Desligamento'];
+
+function sgCls(field, val){
+  const map={
+    presenca:  {Presente:'sel-presente',Ausente:'sel-ausente',Parcial:'sel-parcial'},
+    cumpriu:   {Sim:'sel-sim','Não':'sel-nao'},
+    subst:     {'Não houve':'sel-naoh','Sub. Bolsista':'sel-sub-b','Sub. Voluntário':'sel-sub-v',Desligamento:'sel-deslig'}
+  };
+  return map[field]?.[val]||'';
+}
+
+function sgBtn(field, opt, projId, partId, current, disabled){
+  const cls=sgCls(field,opt);
+  const sel=(current===opt);
+  return `<button class="sg-btn${sel?' '+cls:''}" ${disabled?'disabled':''} onclick="setStat('${projId}','${partId}','${field}','${opt}')">${opt}</button>`;
+}
+
+function setStat(projId, partId, field, val){
+  // Toggle: se já selecionado, desmarca
+  const key=`stat-${projId}-${partId}-${field}`;
+  const cur=window._stat?.[key];
+  if(!window._stat) window._stat={};
+  window._stat[key]= (cur===val) ? null : val;
+  // Se marcou Ausente, limpa cumpriu
+  if(field==='presenca' && val==='Ausente') window._stat[`stat-${projId}-${partId}-cumpriu`]=null;
+  // Re-render só a linha do participante
+  const row=document.getElementById(`srow-${projId}-${partId}`);
+  if(row) row.outerHTML=renderPartStatusRow(
+    D.participantes.find(p=>String(p.id)===String(partId)),
+    projId, false
+  );
+  updateSubmit();
+}
+
+function getStat(projId, partId, field){
+  return window._stat?.[`stat-${projId}-${partId}-${field}`]||null;
+}
+
+function renderPartStatusRow(p, projId, ro, sentData){
+  const presenca  = ro ? (sentData?.presencas?.[String(p.id)]?.presenca||'—')  : (getStat(projId,p.id,'presenca')||'');
+  const cumpriu   = ro ? (sentData?.presencas?.[String(p.id)]?.cumpriu||'—')   : (getStat(projId,p.id,'cumpriu')||'');
+  const subst     = ro ? (sentData?.presencas?.[String(p.id)]?.subst||'—')     : (getStat(projId,p.id,'subst')||'');
+  const isAusente = presenca==='Ausente';
+
+  if(ro){
+    const pCls=sgCls('presenca',presenca);
+    const cCls=sgCls('cumpriu',cumpriu);
+    const sCls=sgCls('subst',subst);
+    return `<tr id="srow-${projId}-${p.id}">
+      <td><div class="part-name-cell">${p.nome}<em>${p.tipo}</em></div></td>
+      <td><span class="sg-btn ${pCls}" style="cursor:default">${presenca}</span></td>
+      <td><span class="sg-btn ${isAusente?'':cCls}" style="cursor:default;${isAusente?'opacity:.3':''}">${isAusente?'—':cumpriu}</span></td>
+      <td><span class="sg-btn ${sCls}" style="cursor:default">${subst}</span></td>
+    </tr>`;
+  }
+
+  return `<tr id="srow-${projId}-${p.id}">
+    <td><div class="part-name-cell">${p.nome}<em>${p.tipo}</em></div></td>
+    <td><div class="btn-group">${OPT_PRESENCA.map(o=>sgBtn('presenca',o,projId,p.id,presenca,false)).join('')}</div></td>
+    <td><div class="btn-group">${OPT_CUMPRIU.map(o=>sgBtn('cumpriu',o,projId,p.id,cumpriu,isAusente)).join('')}</div></td>
+    <td><div class="btn-group">${OPT_SUBSTITUICAO.map(o=>sgBtn('subst',o,projId,p.id,subst,false)).join('')}</div></td>
+  </tr>`;
+}
+
 function renderCoordProjs(){
+  window._stat={};
   const mes=document.getElementById('coord-mes')?.value;
   const cont=document.getElementById('coord-projs');if(!cont)return;
   const myProjs=D.projetos.filter(p=>String(p.coordId)===String(CU?.id)&&p.status==='Ativo');
@@ -1134,23 +1237,29 @@ function renderCoordProjs(){
   }
   cont.innerHTML=myProjs.map(proj=>{
     const parts=D.participantes.filter(p=>String(p.projetoId)===String(proj.id));
-    const sent=D.assiduidades.find(a=>String(a.projetoId)===String(proj.id)&&a.mes===mes);
+    const sent=D.assiduidades.find(a=>String(a.projetoId)===String(proj.id)&&String(a.mes).trim()===String(mes).trim());
     const ro=!!sent;
     return `
 <div class="passid-card">
   <div class="passid-hd">
     <div><h3>${proj.titulo}</h3><p><span class="badge ${SBADGE[proj.segmento]||''}">${proj.segmento}</span> · ${mLabel(mes)}</p></div>
-    ${ro?`<span class="sent-chip"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Enviado</span>`:''}
+    ${ro?`<span class="sent-chip"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg> Enviado</span>`:''}
   </div>
   <div class="passid-bd">
-    ${parts.length ? parts.map(p=>`
-      <div class="pcheck-row">
-        <input type="checkbox" id="pck-${proj.id}-${p.id}"
-          ${ro?(sent.presencas&&sent.presencas[p.id]?'checked':'')+' disabled':''}
-          onchange="updateSubmit()"/>
-        <label for="pck-${proj.id}-${p.id}">${p.nome}</label>
-        <span class="badge b-${p.tipo==='Bolsista'?'bolsista':'voluntario'}">${p.tipo}</span>
-      </div>`).join('')
+    ${parts.length ? `
+    <div style="overflow-x:auto">
+    <table class="part-status-table">
+      <thead><tr>
+        <th>Participante</th>
+        <th>Presença</th>
+        <th>Cumpriu atividades</th>
+        <th>Substituição / Desligamento</th>
+      </tr></thead>
+      <tbody>
+        ${parts.map(p=>renderPartStatusRow(p,proj.id,ro,sent)).join('')}
+      </tbody>
+    </table>
+    </div>`
     :`<p style="font-size:13px;color:var(--text3);padding:7px 0">Nenhum participante cadastrado.</p>`}
     <div class="obs-field">
       <label>Observações (opcional)</label>
@@ -1169,7 +1278,7 @@ function renderCoordProjs(){
 function updateSubmit(){
   const mes=document.getElementById('coord-mes')?.value;
   const myProjs=D.projetos.filter(p=>String(p.coordId)===String(CU?.id)&&p.status==='Ativo');
-  const pending=myProjs.filter(p=>!D.assiduidades.find(a=>String(a.projetoId)===String(p.id)&&a.mes===mes));
+  const pending=myProjs.filter(p=>!D.assiduidades.find(a=>String(a.projetoId)===String(p.id)&&String(a.mes).trim()===String(mes).trim()));
   const ready=pending.filter(p=>document.getElementById(`decl-${p.id}`)?.checked);
   document.getElementById('sub-summary').textContent=`${ready.length} de ${pending.length} projeto(s) pronto${ready.length!==1?'s':''} para envio — `;
   document.getElementById('btn-submit').disabled=(ready.length===0);
@@ -1178,9 +1287,25 @@ function updateSubmit(){
 async function submitAll(){
   const mes=document.getElementById('coord-mes').value;
   const myProjs=D.projetos.filter(p=>String(p.coordId)===String(CU?.id)&&p.status==='Ativo');
-  const pending=myProjs.filter(p=>!D.assiduidades.find(a=>String(a.projetoId)===String(p.id)&&a.mes===mes));
+  const pending=myProjs.filter(p=>!D.assiduidades.find(a=>String(a.projetoId)===String(p.id)&&String(a.mes).trim()===String(mes).trim()));
   const ready=pending.filter(p=>document.getElementById(`decl-${p.id}`)?.checked);
   if(!ready.length){toast('Confirme a declaração de pelo menos um projeto.','error');return;}
+  // Valida que todos os participantes têm presença selecionada
+  for(const proj of ready){
+    const parts=D.participantes.filter(p=>String(p.projetoId)===String(proj.id));
+    for(const p of parts){
+      if(!getStat(proj.id,p.id,'presenca')){
+        toast(`Selecione a presença de todos os participantes — "${p.nome}" está sem preenchimento.`,'error');return;
+      }
+      if(!getStat(proj.id,p.id,'subst')){
+        toast(`Selecione substituição/desligamento de "${p.nome}".`,'error');return;
+      }
+      const pres=getStat(proj.id,p.id,'presenca');
+      if(pres!=='Ausente'&&!getStat(proj.id,p.id,'cumpriu')){
+        toast(`Indique se "${p.nome}" cumpriu as atividades.`,'error');return;
+      }
+    }
+  }
   const ok=await confirm2('Enviar Assiduidade',`Enviar ${ready.length} projeto(s) para ${mLabel(mes)}? Não será possível reenviar.`,'Enviar');
   if(!ok)return;
   document.getElementById('btn-submit').disabled=true;
@@ -1188,11 +1313,18 @@ async function submitAll(){
     for(const proj of ready){
       const parts=D.participantes.filter(p=>String(p.projetoId)===String(proj.id));
       const presencas={};
-      parts.forEach(p=>{presencas[p.id]=!!document.getElementById(`pck-${proj.id}-${p.id}`)?.checked;});
+      parts.forEach(p=>{
+        presencas[p.id]={
+          presenca: getStat(proj.id,p.id,'presenca'),
+          cumpriu:  getStat(proj.id,p.id,'cumpriu')||null,
+          subst:    getStat(proj.id,p.id,'subst')
+        };
+      });
       const obs=document.getElementById(`obs-${proj.id}`)?.value||'';
       const r=await api('submitAssid',{projetoId:proj.id,mes,presencas,observacoes:obs,declaracao:true,coordId:CU.id});
       D.assiduidades.push({...r.item,presencas,declaracao:true});
     }
+    window._stat={};
     renderCoordProjs();
     toast('Assiduidade enviada com sucesso!','success');
   }catch(e){
