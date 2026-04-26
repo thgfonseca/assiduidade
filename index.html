@@ -1492,20 +1492,20 @@ function renderCoordHist(){
     return;
   }
 
-  // Monta todos os meses possíveis (Janeiro 2026 → Abril 2028)
-  const todosMeses=meses();
-
-  // Agrupa: para cada mês, verifica cada projeto
-  // Exibe meses em ordem decrescente, só os que têm ao menos um projeto com dados
   const presColor={Presente:'#E8F7EF;color:#1A7F4B',Ausente:'#FDECEA;color:#C0392B',Parcial:'#FEF3C7;color:#B45309'};
   const subColor={'Não houve':'#E8F7EF;color:#1A7F4B','Substituição':'#EBF0FF;color:#1240A8','Desligamento':'#FDECEA;color:#C0392B'};
-
   const chip=(bg,v)=>'<span style="display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;background:'+bg+'">'+v+'</span>';
 
-  // Todos os meses em ordem decrescente
-  const mesesdesc=[...todosMeses].reverse();
+  // Meses em ordem crescente a partir do ano atual
+  const anoAtual=new Date().getFullYear();
+  const todosMeses=meses().filter(m=>parseInt(m.v.split('-')[0])>=anoAtual);
 
-  const sections=mesesdesc.map(mes=>{
+  // Agrupa por ano
+  const anos=[...new Set(todosMeses.map(m=>m.v.split('-')[0]))];
+
+  const sections=anos.map(ano=>{
+    const mesesDoAno=todosMeses.filter(m=>m.v.startsWith(ano+'-'));
+    const projsHtmlDoAno=mesesDoAno.map(mes=>{
     const projsComDados=myProjs; // mostra todos, com ou sem envio
 
     const projsHtml=projsComDados.map(proj=>{
@@ -1575,12 +1575,21 @@ function renderCoordHist(){
       +'</div>';
     }).join('');
 
-    return '<div style="margin-bottom:24px">'
-      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'
-        +'<h3 style="font-size:15px;font-weight:700;color:var(--text)">'+mes.l+'</h3>'
-        +'<div style="flex:1;height:1px;background:var(--border)"></div>'
+      return '<div style="margin-bottom:20px">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+          +'<p style="font-size:13px;font-weight:700;color:var(--text2);white-space:nowrap">'+mes.l+'</p>'
+          +'<div style="flex:1;height:1px;background:var(--border)"></div>'
+        +'</div>'
+        +projsHtml
+      +'</div>';
+    }).join('');
+
+    return '<div style="margin-bottom:32px">'
+      +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">'
+        +'<div style="background:var(--blue);color:#fff;font-family:Sora,sans-serif;font-weight:800;font-size:14px;padding:5px 16px;border-radius:20px">'+ano+'</div>'
+        +'<div style="flex:1;height:2px;background:var(--blue-p2)"></div>'
       +'</div>'
-      +projsHtml
+      +projsHtmlDoAno
     +'</div>';
   }).join('');
 
