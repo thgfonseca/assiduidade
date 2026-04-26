@@ -283,6 +283,12 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
 .obs-field label{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
 .obs-field textarea{width:100%;border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:#fff;outline:none;resize:vertical;min-height:78px;transition:border-color .2s}
 .obs-field textarea:focus{border-color:var(--blue)}
+.obs-field.required label{color:var(--warn)}
+.obs-field.required textarea{border-color:var(--warn);background:#FFFBEB}
+.obs-aviso{background:var(--warn-bg);border:1px solid #FDE68A;border-radius:8px;padding:10px 13px;margin-bottom:8px;font-size:12px;color:var(--warn);line-height:1.5}
+.obs-aviso strong{display:block;margin-bottom:4px;font-size:12px}
+.obs-aviso ul{margin:4px 0 0 16px;padding:0}
+.obs-aviso ul li{margin-bottom:2px}
 .decl-wrap{display:flex;align-items:flex-start;gap:11px;background:var(--blue-p);border:1px solid var(--blue-p2);border-radius:10px;padding:13px;cursor:pointer}
 .decl-wrap input{width:19px;height:19px;accent-color:var(--blue);flex-shrink:0;margin-top:1px;cursor:pointer}
 .decl-text{font-size:13px;color:var(--blue-d);line-height:1.5}
@@ -1121,7 +1127,7 @@ function renderConf(){
         const isAus=pres==='Ausente';
         const presColor={Presente:'#E8F7EF;color:#1A7F4B',Ausente:'#FDECEA;color:#C0392B',Parcial:'#FEF3C7;color:#B45309'}[pres]||'#F3F4F6;color:#6B7280';
         const cumColor=isAus?'#F3F4F6;color:#9C8270':{Sim:'#E8F7EF;color:#1A7F4B','Não':'#FDECEA;color:#C0392B'}[cum]||'#F3F4F6;color:#6B7280';
-        const subColor={'Não houve':'#E8F7EF;color:#1A7F4B','Sub. Bolsista':'#EBF0FF;color:#1240A8','Sub. Voluntário':'#F3E8FF;color:#7C3AED','Desligamento':'#FDECEA;color:#C0392B'}[sub]||'#F3F4F6;color:#6B7280';
+        const subColor={'Não houve':'#E8F7EF;color:#1A7F4B','Substituição':'#EBF0FF;color:#1240A8','Desligamento':'#FDECEA;color:#C0392B'}[sub]||'#F3F4F6;color:#6B7280';
         return `<tr>
           <td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;vertical-align:middle">${p.nome}<br><span class="badge b-${p.tipo==='Bolsista'?'bolsista':'voluntario'}" style="margin-top:3px">${p.tipo}</span></td>
           <td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);vertical-align:middle"><span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${presColor}">${enviado?(pres||'—'):'Não enviado'}</span></td>
@@ -1162,13 +1168,13 @@ async function validarAssid(id){
 // Status options
 const OPT_PRESENCA    = ['Presente','Ausente','Parcial'];
 const OPT_CUMPRIU     = ['Sim','Não'];
-const OPT_SUBSTITUICAO= ['Não houve','Sub. Bolsista','Sub. Voluntário','Desligamento'];
+const OPT_SUBSTITUICAO= ['Não houve','Substituição','Desligamento'];
 
 function sgCls(field, val){
   const map={
     presenca:  {Presente:'sel-presente',Ausente:'sel-ausente',Parcial:'sel-parcial'},
     cumpriu:   {Sim:'sel-sim','Não':'sel-nao'},
-    subst:     {'Não houve':'sel-naoh','Sub. Bolsista':'sel-sub-b','Sub. Voluntário':'sel-sub-v',Desligamento:'sel-deslig'}
+    subst:     {'Não houve':'sel-naoh',Substituição:'sel-sub-b',Desligamento:'sel-deslig'}
   };
   return map[field]?.[val]||'';
 }
@@ -1193,11 +1199,48 @@ function setStat(projId, partId, field, val){
     D.participantes.find(p=>String(p.id)===String(partId)),
     projId, false
   );
-  updateSubmit();
+  checkObsAviso(projId);
 }
 
 function getStat(projId, partId, field){
   return window._stat?.[`stat-${projId}-${partId}-${field}`]||null;
+}
+
+// Calcula mensagens obrigatórias de observação para um projeto
+function calcObsAvisos(projId){
+  const parts=D.participantes.filter(p=>String(p.projetoId)===String(projId));
+  const msgs=[];
+  parts.forEach(p=>{
+    const pres =getStat(projId,p.id,'presenca');
+    const cum  =getStat(projId,p.id,'cumpriu');
+    const sub  =getStat(projId,p.id,'subst');
+    if(pres==='Ausente')    msgs.push(`<li><strong>${p.nome}:</strong> descreva o motivo da ausência.</li>`);
+    if(pres==='Parcial')    msgs.push(`<li><strong>${p.nome}:</strong> descreva o período ou motivo da presença parcial.</li>`);
+    if(cum==='Não')         msgs.push(`<li><strong>${p.nome}:</strong> descreva quais atividades não foram cumpridas.</li>`);
+    if(sub==='Substituição')msgs.push(`<li><strong>${p.nome}:</strong> informe os dados do substituto.</li>`);
+    if(sub==='Desligamento')msgs.push(`<li><strong>${p.nome}:</strong> descreva o motivo do desligamento.</li>`);
+  });
+  return msgs;
+}
+
+function checkObsAviso(projId){
+  const msgs=calcObsAvisos(projId);
+  const wrap =document.getElementById(`obs-wrap-${projId}`);
+  const aviso=document.getElementById(`obs-aviso-${projId}`);
+  const optEl=document.getElementById(`obs-label-opt-${projId}`);
+  const textarea=document.getElementById(`obs-${projId}`);
+  if(!wrap||!aviso)return;
+  if(msgs.length){
+    aviso.innerHTML=`<div class="obs-aviso"><strong>⚠ Observação obrigatória para:</strong><ul>${msgs.join('')}</ul></div>`;
+    wrap.classList.add('required');
+    if(optEl) optEl.textContent=' (obrigatório)';
+  } else {
+    aviso.innerHTML='';
+    wrap.classList.remove('required');
+    if(optEl) optEl.textContent=' (opcional)';
+  }
+  // Força recheck do botão enviar
+  updateSubmit();
 }
 
 function renderPartStatusRow(p, projId, ro, sentData){
@@ -1261,9 +1304,10 @@ function renderCoordProjs(){
     </table>
     </div>`
     :`<p style="font-size:13px;color:var(--text3);padding:7px 0">Nenhum participante cadastrado.</p>`}
-    <div class="obs-field">
-      <label>Observações (opcional)</label>
-      <textarea id="obs-${proj.id}" ${ro?'disabled':''}>${ro?(sent.observacoes||''):''}</textarea>
+    <div class="obs-field" id="obs-wrap-${proj.id}">
+      <div id="obs-aviso-${proj.id}"></div>
+      <label>Observações<span id="obs-label-opt-${proj.id}"> (opcional)</span></label>
+      <textarea id="obs-${proj.id}" ${ro?'disabled':''} oninput="checkObsAviso('${proj.id}')">${ro?(sent.observacoes||''):''}</textarea>
     </div>
     <label class="decl-wrap" style="${ro?'opacity:.7;cursor:default':''}">
       <input type="checkbox" id="decl-${proj.id}" ${ro?(sent.declaracao?'checked':'')+' disabled':''} onchange="updateSubmit()"/>
@@ -1290,19 +1334,29 @@ async function submitAll(){
   const pending=myProjs.filter(p=>!D.assiduidades.find(a=>String(a.projetoId)===String(p.id)&&String(a.mes).trim()===String(mes).trim()));
   const ready=pending.filter(p=>document.getElementById(`decl-${p.id}`)?.checked);
   if(!ready.length){toast('Confirme a declaração de pelo menos um projeto.','error');return;}
-  // Valida que todos os participantes têm presença selecionada
+  // Valida campos obrigatórios por participante
   for(const proj of ready){
     const parts=D.participantes.filter(p=>String(p.projetoId)===String(proj.id));
     for(const p of parts){
       if(!getStat(proj.id,p.id,'presenca')){
-        toast(`Selecione a presença de todos os participantes — "${p.nome}" está sem preenchimento.`,'error');return;
-      }
-      if(!getStat(proj.id,p.id,'subst')){
-        toast(`Selecione substituição/desligamento de "${p.nome}".`,'error');return;
+        toast(`Presença obrigatória — "${p.nome}" não foi preenchida.`,'error');return;
       }
       const pres=getStat(proj.id,p.id,'presenca');
       if(pres!=='Ausente'&&!getStat(proj.id,p.id,'cumpriu')){
-        toast(`Indique se "${p.nome}" cumpriu as atividades.`,'error');return;
+        toast(`Informe se "${p.nome}" cumpriu as atividades.`,'error');return;
+      }
+      if(!getStat(proj.id,p.id,'subst')){
+        toast(`Informe substituição/desligamento de "${p.nome}".`,'error');return;
+      }
+    }
+    // Valida observação obrigatória
+    const avisos=calcObsAvisos(proj.id);
+    if(avisos.length){
+      const obs=document.getElementById(`obs-${proj.id}`)?.value?.trim();
+      if(!obs){
+        toast(`Preencha o campo de observações do projeto "${proj.titulo}" — há situações que requerem justificativa.`,'error');
+        document.getElementById(`obs-${proj.id}`)?.focus();
+        return;
       }
     }
   }
