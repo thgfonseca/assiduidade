@@ -450,10 +450,20 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
             </select>
           </div>
         </div>
-        <button class="btn btn-primary" onclick="dispararLembreteManual()" style="white-space:nowrap">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          Enviar Lembrete aos Coordenadores
-        </button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="exportarXLS()" style="white-space:nowrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Exportar XLS
+          </button>
+          <button class="btn btn-ghost" onclick="exportarPDF()" style="white-space:nowrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Exportar PDF
+          </button>
+          <button class="btn btn-primary" onclick="dispararLembreteManual()" style="white-space:nowrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Enviar Lembrete
+          </button>
+        </div>
       </div>
       <div id="conf-list"></div>
     </div>
@@ -1609,6 +1619,133 @@ function togHistProj(head, bodyId){
   const isHidden=b.style.display==='none'||b.style.display==='';
   b.style.display=isHidden?'block':'none';
   c?.classList.toggle('open',isHidden);
+}
+
+// ════════════════════════════════════════════════
+// EXPORTAÇÃO — dados conforme filtro ativo
+// ════════════════════════════════════════════════
+
+function buildExportRows(){
+  const mes=(document.getElementById('conf-mes')?.value||'').trim();
+  const seg=(document.getElementById('conf-seg')?.value||'').trim();
+  const mesLbl=mLabel(mes);
+  const segLbl=seg||'Todos';
+
+  let projsFiltrados=D.projetos.filter(p=>p.status==='Ativo');
+  if(seg) projsFiltrados=projsFiltrados.filter(p=>p.segmento===seg);
+
+  const rows=[];
+  projsFiltrados.forEach(proj=>{
+    const coord=D.coordenadores.find(c=>String(c.id)===String(proj.coordId))||{nome:'—'};
+    const parts=D.participantes.filter(p=>String(p.projetoId)===String(proj.id));
+    const assid=D.assiduidades.find(a=>String(a.projetoId)===String(proj.id)&&String(a.mes).trim()===mes);
+    const enviado=!!assid;
+    const status=!enviado?'Não enviado':(assid.status||'Pendente');
+
+    if(!parts.length){
+      rows.push([coord.nome, proj.titulo, proj.segmento, '—', '—', '—', '—', '—', '—', status]);
+    } else {
+      parts.forEach(p=>{
+        const pd=enviado&&assid.presencas?assid.presencas[String(p.id)]:{};
+        const pres  = enviado?(pd?.presenca||'—'):'—';
+        const cum   = enviado?(pd?.presenca==='Ausente'?'—':(pd?.cumpriu||'—')):'—';
+        const sub   = enviado?(pd?.subst||'—'):'—';
+        const obs   = enviado?(assid.observacoes||'—'):'—';
+        rows.push([coord.nome, proj.titulo, proj.segmento, p.nome, p.tipo, pres, cum, sub, obs, status]);
+      });
+    }
+  });
+
+  return { rows, mes: mesLbl, seg: segLbl, mesVal: mes };
+}
+
+function nomeArquivo(tipo, seg, mes){
+  const s=seg==='Todos'?'Todos':seg;
+  const m=mes.replace(/ de /g,'_').replace(/ /g,'_');
+  return 'Assiduidade_'+s+'_'+m+'.'+tipo;
+}
+
+// ── EXPORTAR XLS ──────────────────────────────
+function exportarXLS(){
+  const {rows, mes, seg, mesVal}=buildExportRows();
+  if(!rows.length){toast('Nenhum dado para exportar.','error');return;}
+
+  const header=['Coordenador','Projeto','Segmento','Participante','Tipo','Presença','Cumpriu Atividades','Substituição/Desligamento','Observações','Status'];
+
+  // Monta CSV com separador ponto-e-vírgula (abre direto no Excel BR)
+  const titulo='Assiduidade — '+seg+' · '+mes;
+  const escapeCSV=c=>{const s=String(c).replace(/"/g,'""');return '"'+s+'"';};
+  const linhas=[
+    [titulo],
+    [],
+    header,
+    ...rows
+  ].map(r=>r.map(escapeCSV).join(';')).join('\r\n');
+
+  const bom='﻿'; // BOM para Excel reconhecer UTF-8
+  const blob=new Blob([bom+linhas],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=nomeArquivo('xls',seg,mes);
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Arquivo XLS exportado.','success');
+}
+
+// ── EXPORTAR PDF ──────────────────────────────
+function exportarPDF(){
+  const {rows, mes, seg}=buildExportRows();
+  if(!rows.length){toast('Nenhum dado para exportar.','error');return;}
+
+  const header=['Coordenador','Projeto','Segmento','Participante','Tipo','Presença','Cumpriu','Substituição','Observações','Status'];
+  const colWidths=[14,16,11,14,9,9,8,12,16,10]; // % larguras
+
+  const statusColor=(s)=>{
+    if(s==='Validado')   return '#1A7F4B';
+    if(s==='Pendente')   return '#1A56DB';
+    if(s==='Não enviado')return '#9C8270';
+    return '#1A1208';
+  };
+  const presColor=(v)=>({Presente:'#1A7F4B',Ausente:'#C0392B',Parcial:'#B45309'}[v]||'#9C8270');
+  const cellStyle=(v,col)=>{
+    let color='#1A1208';
+    if(col===5)color=presColor(v);
+    if(col===9)color=statusColor(v);
+    return 'padding:5px 7px;font-size:10px;border:1px solid #e0e0e0;vertical-align:top;color:'+color+';font-weight:'+(col===9?'700':'400')+';word-break:break-word';
+  };
+
+  const thStyle='padding:7px;font-size:10px;background:#1A56DB;color:#fff;text-align:left;font-weight:700;border:1px solid #1240A8';
+
+  const tableRows=rows.map((r,ri)=>{
+    const bg=ri%2===0?'#fff':'#F5F8FF';
+    const cells=r.map((v,ci)=>'<td style="'+cellStyle(v,ci)+';background:'+bg+'">'+v+'</td>').join('');
+    return '<tr>'+cells+'</tr>';
+  }).join('');
+
+  const ths=header.map((h,i)=>'<th style="'+thStyle+';width:'+colWidths[i]+'%">'+h+'</th>').join('');
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<title>Assiduidade</title>
+<style>
+  @page{size:A4 landscape;margin:15mm}
+  body{font-family:Arial,sans-serif;font-size:10px;color:#1A1208;margin:0}
+  h1{font-size:14px;font-weight:700;color:#1A56DB;margin:0 0 4px}
+  p{font-size:11px;color:#5C4A35;margin:0 0 14px}
+  table{width:100%;border-collapse:collapse;table-layout:fixed}
+</style></head><body>
+<h1>Assiduidade — ${seg} · ${mes}</h1>
+<p>Exportado em ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</p>
+<table><thead><tr>${ths}</tr></thead><tbody>${tableRows}</tbody></table>
+</body></html>`;
+
+  const win=window.open('','_blank');
+  if(!win){toast('Permita popups para exportar PDF.','error');return;}
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{win.print();},400);
+  toast('Janela de impressão aberta. Selecione "Salvar como PDF".','info',5000);
 }
 
 // ════════════════════════════════════════════════
