@@ -440,14 +440,20 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
         <h2 style="font-size:18px;font-weight:800">Conferência de Assiduidade</h2>
         <p style="font-size:13px;color:var(--text3);margin-top:3px">Visualize e valide as assiduidades enviadas</p>
       </div>
-      <div class="filter-bar">
-        <div class="fi"><label>Mês</label><select id="conf-mes" onchange="renderConf()"></select></div>
-        <div class="fi"><label>Segmento</label>
-          <select id="conf-seg" onchange="renderConf()">
-            <option value="">Todos</option>
-            <option>Ensino</option><option>Pesquisa</option><option>Extensão</option><option>Indissociável</option>
-          </select>
+      <div class="filter-bar" style="align-items:flex-end;justify-content:space-between;flex-wrap:wrap">
+        <div style="display:flex;gap:11px;flex-wrap:wrap;align-items:flex-end">
+          <div class="fi"><label>Mês</label><select id="conf-mes" onchange="renderConf()"></select></div>
+          <div class="fi"><label>Segmento</label>
+            <select id="conf-seg" onchange="renderConf()">
+              <option value="">Todos</option>
+              <option>Ensino</option><option>Pesquisa</option><option>Extensão</option><option>Indissociável</option>
+            </select>
+          </div>
         </div>
+        <button class="btn btn-primary" onclick="dispararLembreteManual()" style="white-space:nowrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar Lembrete aos Coordenadores
+        </button>
       </div>
       <div id="conf-list"></div>
     </div>
@@ -1603,6 +1609,29 @@ function togHistProj(head, bodyId){
   const isHidden=b.style.display==='none'||b.style.display==='';
   b.style.display=isHidden?'block':'none';
   c?.classList.toggle('open',isHidden);
+}
+
+// ════════════════════════════════════════════════
+// LEMBRETE MANUAL
+// ════════════════════════════════════════════════
+async function dispararLembreteManual(){
+  const agora=new Date();
+  const mesAtual=agora.toLocaleString('pt-BR',{month:'long',year:'numeric'});
+  const ok=await confirm2(
+    'Enviar Lembrete',
+    'Enviar e-mail de lembrete para todos os coordenadores ativos referente ao mês de '+mesAtual.charAt(0).toUpperCase()+mesAtual.slice(1)+'?',
+    'Enviar para todos'
+  );
+  if(!ok)return;
+  try{
+    showLoader();
+    const r=await api('dispararLembrete',{adminEmail:CU.email,adminNome:CU.nome});
+    hideLoader();
+    toast('Lembrete enviado para '+r.enviados+' coordenador(es) — '+r.mes+'.','success',5000);
+  }catch(e){
+    hideLoader();
+    toast(e.message||'Erro ao enviar lembrete.','error');
+  }
 }
 
 // ════════════════════════════════════════════════
