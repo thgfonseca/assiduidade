@@ -540,6 +540,12 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
 const GAS_URL         = 'https://script.google.com/macros/s/AKfycbyDILy-OkroqPdtwEW6ohmhe3wggLJEKZJRVXsd-159BoQ52kU5On7PrTPZOfs_J2EB/exec';
 const GOOGLE_CLIENT_ID = '1051968147490-ch0u4hkd57h66c0i0q03ovdvdo3utus1.apps.googleusercontent.com';
 const DOMAIN          = '@riogrande.ifrs.edu.br';
+// Permissões de validação: quais segmentos cada admin pode validar
+const ADMIN_VALIDACAO = {
+  'dex@riogrande.ifrs.edu.br':  ['Extensão'],
+  'dppi@riogrande.ifrs.edu.br': ['Pesquisa','Indissociável'],
+  'den@riogrande.ifrs.edu.br':  ['Ensino']
+};
 
 // ════════════════════════════════════════════════
 // STATE
@@ -900,7 +906,7 @@ async function addCoord(){
   if(!nome||!email){toast('Preencha nome e e-mail.','error');return;}
   if(!email.endsWith(DOMAIN)){toast('E-mail deve ser @riogrande.ifrs.edu.br','error');return;}
   try{
-    const r=await api('saveCoord',{nome,email,status:'Ativo'});
+    const r=await api('saveCoord',{nome,email,status:'Ativo',adminEmail:CU.email,adminNome:CU.nome});
     D.coordenadores.push(r.item);
     document.getElementById('nc-nome').value='';
     document.getElementById('nc-email').value='';
@@ -924,7 +930,7 @@ async function saveEditCoord(){
   const status=document.getElementById('ec-status').value;
   if(!nome||!email){toast('Preencha todos os campos.','error');return;}
   try{
-    const r=await api('saveCoord',{id,nome,email,status});
+    const r=await api('saveCoord',{id,nome,email,status,adminEmail:CU.email,adminNome:CU.nome});
     const i=D.coordenadores.findIndex(x=>x.id==id);if(i>=0)D.coordenadores[i]=r.item;
     closeModal('m-edit-coord');renderMgmt();toast('Coordenador atualizado.','success');
   }catch(e){toast(e.message,'error');}
@@ -933,7 +939,7 @@ async function delCoord(id){
   const ok=await confirm2('Remover Coordenador','Todos os projetos e participantes vinculados serão removidos.','Remover');
   if(!ok)return;
   try{
-    await api('deleteCoord',{id});
+    await api('deleteCoord',{id,adminEmail:CU.email,adminNome:CU.nome});
     const projIds=D.projetos.filter(p=>p.coordId==id).map(p=>p.id);
     D.projetos=D.projetos.filter(p=>p.coordId!=id);
     D.participantes=D.participantes.filter(x=>!projIds.includes(x.projetoId));
@@ -951,7 +957,7 @@ async function addProj(coordId){
   const status=document.getElementById(`np-status-${coordId}`).value;
   if(!titulo){toast('Informe o título.','error');return;}
   try{
-    const r=await api('saveProjeto',{titulo,coordId,segmento,status});
+    const r=await api('saveProjeto',{titulo,coordId,segmento,status,adminEmail:isAdmin?CU.email:'',adminNome:isAdmin?CU.nome:'',coordEmail:!isAdmin?CU.email:'',coordNome:!isAdmin?CU.nome:''});
     D.projetos.push(r.item);
     document.getElementById(`np-titulo-${coordId}`).value='';
     closeIForm(`iform-proj-${coordId}`);
@@ -975,7 +981,7 @@ async function saveEditProj(){
   const status=document.getElementById('ep-status').value;
   if(!titulo){toast('Informe o título.','error');return;}
   try{
-    const r=await api('saveProjeto',{id,titulo,segmento,status});
+    const r=await api('saveProjeto',{id,titulo,segmento,status,adminEmail:isAdmin?CU.email:'',adminNome:isAdmin?CU.nome:'',coordEmail:!isAdmin?CU.email:'',coordNome:!isAdmin?CU.nome:''});
     const i=D.projetos.findIndex(x=>x.id==id);if(i>=0)D.projetos[i]={...D.projetos[i],...r.item};
     closeModal('m-edit-proj');renderMgmt();toast('Projeto atualizado.','success');
   }catch(e){toast(e.message,'error');}
@@ -984,7 +990,7 @@ async function delProj(id){
   const ok=await confirm2('Remover Projeto','Participantes vinculados também serão removidos.','Remover');
   if(!ok)return;
   try{
-    await api('deleteProjeto',{id});
+    await api('deleteProjeto',{id,adminEmail:CU.email,adminNome:CU.nome});
     const proj=D.projetos.find(x=>x.id==id);
     D.projetos=D.projetos.filter(x=>x.id!=id);
     D.participantes=D.participantes.filter(x=>x.projetoId!=id);
@@ -1002,7 +1008,7 @@ async function addPart(projId){
   const tipo=document.getElementById(`npt-tipo-${projId}`).value;
   if(!nome){toast('Informe o nome.','error');return;}
   try{
-    const r=await api('saveParticipante',{nome,tipo,projetoId:projId});
+    const r=await api('saveParticipante',{nome,tipo,projetoId:projId,adminEmail:isAdmin?CU.email:'',adminNome:isAdmin?CU.nome:'',coordEmail:!isAdmin?CU.email:'',coordNome:!isAdmin?CU.nome:''});
     D.participantes.push(r.item);
     document.getElementById(`npt-nome-${projId}`).value='';
     closeIForm(`iform-part-${projId}`);
@@ -1028,7 +1034,7 @@ async function saveEditPart(){
   const tipo=document.getElementById('ept-tipo').value;
   if(!nome){toast('Informe o nome.','error');return;}
   try{
-    const r=await api('saveParticipante',{id,nome,tipo});
+    const r=await api('saveParticipante',{id,nome,tipo,adminEmail:isAdmin?CU.email:'',adminNome:isAdmin?CU.nome:'',coordEmail:!isAdmin?CU.email:'',coordNome:!isAdmin?CU.nome:''});
     const i=D.participantes.findIndex(x=>x.id==id);
     if(i>=0)D.participantes[i]={...D.participantes[i],...r.item};
     closeModal('m-edit-part');
@@ -1041,8 +1047,8 @@ async function delPart(id){
   const ok=await confirm2('Remover Participante','Esta ação não pode ser desfeita.','Remover');
   if(!ok)return;
   try{
-    await api('deleteParticipante',{id});
-    document.getElementById(`pr-${id}`)?.remove();
+    await api('deleteParticipante',{id,adminEmail:isAdmin?CU.email:'',adminNome:isAdmin?CU.nome:'',coordEmail:!isAdmin?CU.email:'',coordNome:!isAdmin?CU.nome:''});
+    document.getElementById('pr-'+id)?.remove();
     D.participantes=D.participantes.filter(x=>x.id!=id);
     toast('Participante removido.','success');
   }catch(e){toast(e.message,'error');}
@@ -1051,116 +1057,161 @@ async function delPart(id){
 // ════════════════════════════════════════════════
 // CONFERÊNCIA
 // ════════════════════════════════════════════════
+
+function projIsOk(assid, parts){
+  if(!assid) return false;
+  if(assid.observacoes && assid.observacoes.trim()) return false;
+  return parts.every(p=>{
+    const pd=assid.presencas?.[String(p.id)]||{};
+    return pd.presenca==='Presente' && pd.cumpriu==='Sim' && pd.subst==='Não houve';
+  });
+}
+
+function podeValidar(segmento){
+  if(!CU) return false;
+  const segs=ADMIN_VALIDACAO[CU.email]||[];
+  return segs.includes(segmento);
+}
+
 function renderConf(){
   const mes=(document.getElementById('conf-mes')?.value||'').trim();
   const seg=(document.getElementById('conf-seg')?.value||'').trim();
   const cont=document.getElementById('conf-list');if(!cont)return;
 
-  // Filtra projetos pelo segmento selecionado
   let projsFiltrados=D.projetos.filter(p=>p.status==='Ativo');
   if(seg) projsFiltrados=projsFiltrados.filter(p=>p.segmento===seg);
 
   if(!projsFiltrados.length){
-    cont.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><h3>Nenhum projeto encontrado</h3><p>Nenhum projeto ativo para o filtro selecionado.</p></div>`;
+    cont.innerHTML='<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><h3>Nenhum projeto encontrado</h3><p>Nenhum projeto ativo para o filtro selecionado.</p></div>';
     return;
   }
 
-  // Agrupa projetos por coordenador
   const coordIds=[...new Set(projsFiltrados.map(p=>p.coordId))];
+  const presColor={Presente:'#E8F7EF;color:#1A7F4B',Ausente:'#FDECEA;color:#C0392B',Parcial:'#FEF3C7;color:#B45309'};
+  const subColor={'Não houve':'#E8F7EF;color:#1A7F4B','Substituição':'#EBF0FF;color:#1240A8','Desligamento':'#FDECEA;color:#C0392B'};
 
   cont.innerHTML=coordIds.map(coordId=>{
     const coord=D.coordenadores.find(c=>String(c.id)===String(coordId))||{nome:'Coordenador desconhecido',email:'—'};
     const projsCoord=projsFiltrados.filter(p=>String(p.coordId)===String(coordId));
 
-    return `
-<div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);margin-bottom:20px;overflow:hidden;box-shadow:var(--shadow)">
-  <!-- Cabeçalho do coordenador -->
-  <div style="background:var(--blue-p);padding:14px 20px;border-bottom:1px solid var(--blue-p2);display:flex;align-items:center;gap:12px">
-    <div style="width:38px;height:38px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:800;font-size:13px;color:#fff;flex-shrink:0">${ini(coord.nome)}</div>
-    <div>
-      <p style="font-size:14px;font-weight:700;color:var(--blue-d);margin:0">${coord.nome}</p>
-      <p style="font-size:12px;color:var(--text3);margin:2px 0 0">${coord.email} · ${projsCoord.length} projeto${projsCoord.length!==1?'s':''}</p>
-    </div>
-  </div>
-  <!-- Projetos do coordenador -->
-  <div style="padding:12px 16px;display:flex;flex-direction:column;gap:12px">
-    ${projsCoord.map(proj=>{
+    const projsHtml=projsCoord.map(proj=>{
       const parts=D.participantes.filter(p=>String(p.projetoId)===String(proj.id));
       const assid=D.assiduidades.find(a=>String(a.projetoId)===String(proj.id)&&String(a.mes).trim()===mes);
       const enviado=!!assid;
-      const statusAssid=enviado?(assid.status||'Pendente'):'Não enviado';
-      const badgeCls=statusAssid==='Validado'?'b-validado':statusAssid==='Pendente'?'b-pendente':'b-inativo';
+      const jaValidado=enviado&&assid.status==='Validado';
+      const isOk=projIsOk(assid,parts);
+      const podVal=podeValidar(proj.segmento);
 
-      return `
-<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden">
-  <!-- Cabeçalho do projeto -->
-  <div style="padding:11px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px">
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="width:28px;height:28px;background:var(--blue-p2);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue-d)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      </div>
-      <div>
-        <p style="font-size:13px;font-weight:700;margin:0;color:var(--text)">${proj.titulo}</p>
-        <p style="font-size:11px;color:var(--text3);margin:2px 0 0">${parts.length} participante${parts.length!==1?'s':''} · <span class="badge ${SBADGE[proj.segmento]||''}">${proj.segmento}</span></p>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <span class="badge ${badgeCls}">${statusAssid}</span>
-      ${enviado&&assid.status!=='Validado'?`<button class="btn btn-primary btn-sm" onclick="validarAssid('${assid.id}')">✓ Validar</button>`:''}
-    </div>
-  </div>
-  <!-- Participantes -->
-  <div style="padding:4px 16px 12px;overflow-x:auto">
-    ${parts.length?`
-    <table style="width:100%;border-collapse:collapse;margin-top:6px;min-width:560px">
-      <thead><tr>
-        <th style="text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:6px 10px 6px 0;border-bottom:2px solid var(--border)">Participante</th>
-        <th style="text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:6px 10px 6px 0;border-bottom:2px solid var(--border)">Presença</th>
-        <th style="text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:6px 10px 6px 0;border-bottom:2px solid var(--border)">Cumpriu atividades</th>
-        <th style="text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:6px 0;border-bottom:2px solid var(--border)">Substituição / Desligamento</th>
-      </tr></thead>
-      <tbody>${parts.map(p=>{
+      let cardBorder,cardBg,cardLabel,labelColor,labelBg,expandido;
+      if(!enviado){
+        cardBorder='#F59E0B';cardBg='#FFFBEB';
+        cardLabel='⚠ Não enviado';labelColor='#B45309';labelBg='#FEF3C7';
+        expandido=true;
+      } else if(jaValidado){
+        cardBorder='#1A7F4B';cardBg='#F0FDF4';
+        cardLabel='✓ Validado';labelColor='#1A7F4B';labelBg='#E8F7EF';
+        expandido=false;
+      } else if(isOk){
+        cardBorder='#1A7F4B';cardBg='#F0FDF4';
+        cardLabel='✓ Tudo OK';labelColor='#1A7F4B';labelBg='#E8F7EF';
+        expandido=false;
+      } else {
+        cardBorder='#C0392B';cardBg='#FFF8F8';
+        cardLabel='! Requer atenção';labelColor='#C0392B';labelBg='#FDECEA';
+        expandido=true;
+      }
+
+      const bodyId='cpbody-'+proj.id;
+      const partRows=parts.map(p=>{
         const pd=enviado&&assid.presencas?assid.presencas[String(p.id)]:{};
         const pres=pd?.presenca||'';
         const cum=pd?.cumpriu||'';
         const sub=pd?.subst||'';
         const isAus=pres==='Ausente';
-        const presColor={Presente:'#E8F7EF;color:#1A7F4B',Ausente:'#FDECEA;color:#C0392B',Parcial:'#FEF3C7;color:#B45309'}[pres]||'#F3F4F6;color:#6B7280';
-        const cumColor=isAus?'#F3F4F6;color:#9C8270':{Sim:'#E8F7EF;color:#1A7F4B','Não':'#FDECEA;color:#C0392B'}[cum]||'#F3F4F6;color:#6B7280';
-        const subColor={'Não houve':'#E8F7EF;color:#1A7F4B','Substituição':'#EBF0FF;color:#1240A8','Desligamento':'#FDECEA;color:#C0392B'}[sub]||'#F3F4F6;color:#6B7280';
-        return `<tr>
-          <td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;vertical-align:middle">${p.nome}<br><span class="badge b-${p.tipo==='Bolsista'?'bolsista':'voluntario'}" style="margin-top:3px">${p.tipo}</span></td>
-          <td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);vertical-align:middle"><span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${presColor}">${enviado?(pres||'—'):'Não enviado'}</span></td>
-          <td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);vertical-align:middle"><span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${cumColor}">${enviado?(isAus?'—':(cum||'—')):'—'}</span></td>
-          <td style="padding:9px 0;border-bottom:1px solid var(--border);vertical-align:middle"><span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${subColor}">${enviado?(sub||'—'):'—'}</span></td>
-        </tr>`;
-      }).join('')}</tbody>
-    </table>`
-    :`<p style="font-size:12px;color:var(--text3);padding:8px 0">Nenhum participante cadastrado.</p>`}
-    ${enviado&&assid.observacoes?`<div class="conf-obs" style="margin-top:10px"><strong>Observações:</strong> ${assid.observacoes}</div>`:''}
-    ${enviado&&assid.declaracao?`<div class="conf-decl" style="margin-top:8px"><svg viewBox="0 0 24 24" width="13" height="13"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg> Declaração de veracidade confirmada</div>`:''}
-  </div>
-</div>`;
-    }).join('')}
-  </div>
-</div>`;
+        const pc=presColor[pres]||'#F3F4F6;color:#6B7280';
+        const cc=isAus?'#F3F4F6;color:#9C8270':({Sim:'#E8F7EF;color:#1A7F4B','Não':'#FDECEA;color:#C0392B'}[cum]||'#F3F4F6;color:#6B7280');
+        const sc=subColor[sub]||'#F3F4F6;color:#6B7280';
+        const chip=(bg,v)=>'<span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:'+bg+'">'+v+'</span>';
+        return '<tr>'
+          +'<td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;vertical-align:middle">'+p.nome+'<br><span class="badge b-'+(p.tipo==='Bolsista'?'bolsista':'voluntario')+'" style="margin-top:3px">'+p.tipo+'</span></td>'
+          +'<td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+chip(pc,enviado?(pres||'—'):'Não enviado')+'</td>'
+          +'<td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+chip(cc,enviado?(isAus?'—':(cum||'—')):'—')+'</td>'
+          +'<td style="padding:9px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+chip(sc,enviado?(sub||'—'):'—')+'</td>'
+          +'</tr>';
+      }).join('');
+
+      const th=(t)=>'<th style="text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:6px 10px 6px 0;border-bottom:2px solid var(--border)">'+t+'</th>';
+
+      const validarBtn=enviado&&!jaValidado&&podVal
+        ?'<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();validarAssid(\''+assid.id+'\',\''+proj.segmento+'\')">✓ Validar</button>':
+        (enviado&&!jaValidado&&!podVal?'<span style="font-size:11px;color:var(--text3);font-style:italic">Sem permissão</span>':'');
+
+      return '<div style="border:2px solid '+cardBorder+';border-radius:10px;overflow:hidden;background:'+cardBg+'">'
+        +'<div style="padding:11px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;flex-wrap:wrap;gap:8px" onclick="togProjConf(\''+bodyId+'\',this)">'
+          +'<div style="display:flex;align-items:center;gap:10px">'
+            +'<div style="width:6px;min-height:36px;background:'+cardBorder+';border-radius:3px;flex-shrink:0"></div>'
+            +'<div>'
+              +'<p style="font-size:13px;font-weight:700;margin:0;color:var(--text)">'+proj.titulo+'</p>'
+              +'<p style="font-size:11px;color:var(--text3);margin:2px 0 0">'+parts.length+' participante'+(parts.length!==1?'s':'')+' · <span class="badge '+(SBADGE[proj.segmento]||'')+'">'+proj.segmento+'</span></p>'
+            +'</div>'
+          +'</div>'
+          +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'
+            +'<span style="display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;font-family:Sora,sans-serif;background:'+labelBg+';color:'+labelColor+'">'+cardLabel+'</span>'
+            +validarBtn
+            +'<svg class="chev'+(expandido?' open':'')+'" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>'
+          +'</div>'
+        +'</div>'
+        +'<div id="'+bodyId+'" style="border-top:1px solid '+cardBorder+'33;'+(expandido?'':'display:none')+'">'
+          +'<div style="padding:4px 16px 14px;overflow-x:auto">'
+            +(parts.length
+              ?'<table style="width:100%;border-collapse:collapse;margin-top:8px;min-width:560px">'
+                +'<thead><tr>'+th('Participante')+th('Presença')+th('Cumpriu atividades')+th('Substituição / Desligamento')+'</tr></thead>'
+                +'<tbody>'+partRows+'</tbody></table>'
+              :'<p style="font-size:12px;color:var(--text3);padding:8px 0">Nenhum participante cadastrado.</p>')
+            +(enviado&&assid.observacoes?'<div class="conf-obs" style="margin-top:10px"><strong>Observações:</strong> '+assid.observacoes+'</div>':'')
+            +(enviado&&assid.declaracao?'<div class="conf-decl" style="margin-top:8px"><svg viewBox="0 0 24 24" width="13" height="13"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg> Declaração de veracidade confirmada</div>':'')
+          +'</div>'
+        +'</div>'
+      +'</div>';
+    }).join('');
+
+    return '<div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);margin-bottom:20px;overflow:hidden;box-shadow:var(--shadow)">'
+      +'<div style="background:var(--blue-p);padding:14px 20px;border-bottom:1px solid var(--blue-p2);display:flex;align-items:center;gap:12px">'
+        +'<div style="width:38px;height:38px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:Sora,sans-serif;font-weight:800;font-size:13px;color:#fff;flex-shrink:0">'+ini(coord.nome)+'</div>'
+        +'<div>'
+          +'<p style="font-size:14px;font-weight:700;color:var(--blue-d);margin:0">'+coord.nome+'</p>'
+          +'<p style="font-size:12px;color:var(--text3);margin:2px 0 0">'+coord.email+' · '+projsCoord.length+' projeto'+(projsCoord.length!==1?'s':'')+'</p>'
+        +'</div>'
+      +'</div>'
+      +'<div style="padding:12px 16px;display:flex;flex-direction:column;gap:12px">'+projsHtml+'</div>'
+    +'</div>';
   }).join('');
 }
-function togConf(bodyId,head){
-  const b=document.getElementById(bodyId),c=head.querySelector('.chev');
-  b.classList.toggle('open');c.classList.toggle('open');
+
+function togProjConf(bodyId, head){
+  const b=document.getElementById(bodyId);
+  const c=head.querySelector('.chev');
+  if(!b)return;
+  const isHidden=b.style.display==='none';
+  b.style.display=isHidden?'block':'none';
+  c?.classList.toggle('open',isHidden);
 }
-async function validarAssid(id){
+
+async function validarAssid(id, segmento){
+  if(!podeValidar(segmento)){
+    toast('Você não tem permissão para validar projetos de '+segmento+'.','error');return;
+  }
   const ok=await confirm2('Validar Assiduidade','Confirmar validação? Um e-mail será enviado ao coordenador.','Validar');
   if(!ok)return;
   try{
-    await api('validarAssid',{id});
+    await api('validarAssid',{id,adminEmail:CU.email,adminNome:CU.nome});
     const a=D.assiduidades.find(x=>x.id==id);
     if(a)a.status='Validado';
     renderConf();
     toast('Assiduidade validada e e-mail enviado ao coordenador.','success');
   }catch(e){toast(e.message,'error');}
 }
+
 
 // ════════════════════════════════════════════════
 // COORD — ASSIDUIDADE
