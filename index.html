@@ -406,6 +406,10 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
       <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Conferência
     </button>
+    <button class="tab-btn" id="tb-logs" onclick="adminTab('logs')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+      Logs / Auditoria
+    </button>
   </div>
   <div class="content">
 
@@ -466,6 +470,46 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
         </div>
       </div>
       <div id="conf-list"></div>
+    </div>
+
+    <!-- TAB LOGS -->
+    <div class="tab-panel" id="panel-logs">
+      <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2 style="font-size:18px;font-weight:800">Logs / Auditoria</h2>
+          <p style="font-size:13px;color:var(--text3);margin-top:3px">Registro de todas as ações do sistema</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+          <div class="fi">
+            <label>Filtrar por ação</label>
+            <select id="log-filter-acao" onchange="renderLogs()">
+              <option value="">Todas</option>
+              <option value="login">Login</option>
+              <option value="login_negado">Login negado</option>
+              <option value="criar">Criar</option>
+              <option value="editar">Editar</option>
+              <option value="remover">Remover</option>
+              <option value="enviar_assiduidade">Envio assiduidade</option>
+              <option value="validar_assiduidade">Validação</option>
+              <option value="lembrete">Lembrete</option>
+            </select>
+          </div>
+          <div class="fi">
+            <label>Filtrar por perfil</label>
+            <select id="log-filter-role" onchange="renderLogs()">
+              <option value="">Todos</option>
+              <option value="admin">Admin</option>
+              <option value="coord">Coordenador</option>
+              <option value="sistema">Sistema</option>
+            </select>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadLogs()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
+            Atualizar
+          </button>
+        </div>
+      </div>
+      <div id="logs-list"></div>
     </div>
 
   </div>
@@ -758,13 +802,16 @@ function doLogout(){CU=null;isAdmin=false;showPage('page-login');document.getEle
 // TABS ADMIN
 // ════════════════════════════════════════════════
 async function adminTab(name){
-  ['ger','conf'].forEach(t=>{
-    document.getElementById(`tb-${t}`).classList.toggle('active',t===name);
-    document.getElementById(`panel-${t}`).classList.toggle('active',t===name);
+  ['ger','conf','logs'].forEach(t=>{
+    document.getElementById('tb-'+t)?.classList.toggle('active',t===name);
+    document.getElementById('panel-'+t)?.classList.toggle('active',t===name);
   });
   if(name==='conf'){
     try{showLoader();await loadData();hideLoader();}catch(e){hideLoader();}
     renderConf();
+  }
+  if(name==='logs'){
+    await loadLogs();
   }
 }
 
@@ -1619,6 +1666,82 @@ function togHistProj(head, bodyId){
   const isHidden=b.style.display==='none'||b.style.display==='';
   b.style.display=isHidden?'block':'none';
   c?.classList.toggle('open',isHidden);
+}
+
+// ════════════════════════════════════════════════
+// LOGS / AUDITORIA
+// ════════════════════════════════════════════════
+
+let LOGS_DATA = [];
+
+async function loadLogs(){
+  const cont=document.getElementById('logs-list');
+  if(!cont)return;
+  cont.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">Carregando...</div>';
+  try{
+    showLoader();
+    const r=await api('getLogs',{adminEmail:CU.email,adminNome:CU.nome});
+    hideLoader();
+    LOGS_DATA=r.logs||[];
+    renderLogs();
+  }catch(e){
+    hideLoader();
+    cont.innerHTML='<div class="empty"><h3>Erro ao carregar logs</h3><p>'+e.message+'</p></div>';
+  }
+}
+
+function renderLogs(){
+  const cont=document.getElementById('logs-list');
+  if(!cont)return;
+  const filterAcao=(document.getElementById('log-filter-acao')?.value||'').trim();
+  const filterRole=(document.getElementById('log-filter-role')?.value||'').trim();
+
+  let logs=[...LOGS_DATA].reverse(); // mais recente primeiro
+  if(filterAcao) logs=logs.filter(l=>String(l.acao||'').includes(filterAcao));
+  if(filterRole) logs=logs.filter(l=>String(l.role||'')===filterRole);
+
+  if(!logs.length){
+    cont.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><h3>Nenhum registro encontrado</h3><p>Nenhuma ação foi registrada com este filtro.</p></div>';
+    return;
+  }
+
+  const roleColor={admin:'#1A56DB',coord:'#1A7F4B',sistema:'#7C3AED',desconhecido:'#9C8270'};
+  const roleBg={admin:'#EBF0FF',coord:'#E8F7EF',sistema:'#F3E8FF',desconhecido:'#F3F4F6'};
+  const acaoIcon={
+    login:'🔑', login_negado:'🚫', criar_coordenador:'👤', editar_coordenador:'✏️',
+    remover_coordenador:'🗑️', criar_projeto:'📁', editar_projeto:'✏️', remover_projeto:'🗑️',
+    criar_participante:'👥', editar_participante:'✏️', remover_participante:'🗑️',
+    enviar_assiduidade:'📤', validar_assiduidade:'✅', lembrete_manual:'📧',
+    lembrete_automatico:'🤖'
+  };
+
+  const rows=logs.map(l=>{
+    const ts=l.timestamp?new Date(l.timestamp).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—';
+    const role=l.role||'desconhecido';
+    const rc=roleColor[role]||'#9C8270';
+    const rb=roleBg[role]||'#F3F4F6';
+    const icon=acaoIcon[l.acao]||'•';
+    return '<tr style="border-bottom:1px solid var(--border)">'
+      +'<td style="padding:10px 14px;font-size:12px;color:var(--text3);white-space:nowrap;vertical-align:top">'+ts+'</td>'
+      +'<td style="padding:10px 14px;vertical-align:top"><span style="display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;background:'+rb+';color:'+rc+'">'+role+'</span></td>'
+      +'<td style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--text);vertical-align:top">'+l.userNome+'<br><span style="font-size:11px;color:var(--text3);font-weight:400">'+l.userEmail+'</span></td>'
+      +'<td style="padding:10px 14px;font-size:13px;color:var(--text);vertical-align:top">'+icon+' '+String(l.acao||'').replace(/_/g,' ')+'</td>'
+      +'<td style="padding:10px 14px;font-size:13px;color:var(--text2);vertical-align:top;max-width:300px;word-break:break-word">'+l.detalhe+'</td>'
+    +'</tr>';
+  }).join('');
+
+  const th=(t,w)=>'<th style="text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:10px 14px;border-bottom:2px solid var(--border);background:var(--blue-p);white-space:nowrap'+(w?';width:'+w:'')+'">'+t+'</th>';
+
+  cont.innerHTML='<div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)">'
+    +'<div style="padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--border);font-size:12px;color:var(--text3)">'
+      +logs.length+' registro(s) encontrado(s)'
+    +'</div>'
+    +'<div style="overflow-x:auto">'
+    +'<table style="width:100%;border-collapse:collapse;min-width:700px">'
+    +'<thead><tr>'+th('Data/Hora','140px')+th('Perfil','90px')+th('Usuário','160px')+th('Ação','140px')+th('Detalhe')+'</tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'</table>'
+    +'</div></div>';
 }
 
 // ════════════════════════════════════════════════
