@@ -1299,7 +1299,7 @@ function projIsOk(assid, parts){
   if(assid.observacoes && assid.observacoes.trim()) return false;
   return parts.every(p=>{
     const pd=assid.presencas?.[String(p.id)]||{};
-    return pd.presenca==='Presente' && pd.cumpriu==='Sim' && pd.subst==='Não houve';
+    return pd.cumpriu==='Sim';
   });
 }
 
@@ -1340,8 +1340,7 @@ function renderConf(){
   }
 
   const coordIds=[...new Set(projsFiltrados.map(p=>p.coordId))];
-  const presColor={Presente:'#E8F7EF;color:#1A7F4B',Ausente:'#FDECEA;color:#C0392B',Parcial:'#FEF3C7;color:#B45309'};
-  const subColor={'Não houve':'#E8F7EF;color:#1A7F4B','Substituição':'#EBF0FF;color:#1240A8','Desligamento':'#FDECEA;color:#C0392B'};
+
 
   cont.innerHTML=coordIds.map(coordId=>{
     const coord=D.coordenadores.find(c=>String(c.id)===String(coordId))||{nome:'Coordenador desconhecido',email:'—'};
@@ -1377,19 +1376,16 @@ function renderConf(){
       const bodyId='cpbody-'+proj.id;
       const partRows=parts.map(p=>{
         const pd=enviado&&assid.presencas?assid.presencas[String(p.id)]:{};
-        const pres=pd?.presenca||'';
         const cum=pd?.cumpriu||'';
-        const sub=pd?.subst||'';
-        const isAus=pres==='Ausente';
-        const pc=presColor[pres]||'#F3F4F6;color:#6B7280';
-        const cc=isAus?'#F3F4F6;color:#9C8270':({Sim:'#E8F7EF;color:#1A7F4B','Não':'#FDECEA;color:#C0392B'}[cum]||'#F3F4F6;color:#6B7280');
-        const sc=subColor[sub]||'#F3F4F6;color:#6B7280';
+        const sit=pd?.situacao||'';
+        const nao=cum==='Não';
         const chip=(bg,v)=>'<span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:'+bg+'">'+v+'</span>';
+        const cc={Sim:'#E8F7EF;color:#1A7F4B','Não':'#FDECEA;color:#C0392B'}[cum]||'#F3F4F6;color:#6B7280';
+        const sc={Substituição:'#EBF0FF;color:#1240A8',Desligamento:'#FDECEA;color:#C0392B'}[sit]||'#F3F4F6;color:#6B7280';
         return '<tr>'
           +'<td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;vertical-align:middle">'+p.nome+'<br><span class="badge b-'+(p.tipo==='Bolsista'?'bolsista':'voluntario')+'" style="margin-top:3px">'+p.tipo+'</span></td>'
-          +'<td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+chip(pc,enviado?(pres||'—'):'Não enviado')+'</td>'
-          +'<td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+chip(cc,enviado?(isAus?'—':(cum||'—')):'—')+'</td>'
-          +'<td style="padding:9px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+chip(sc,enviado?(sub||'—'):'—')+'</td>'
+          +'<td style="padding:9px 10px 9px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+chip(cc,enviado?(cum||'—'):'Não enviado')+'</td>'
+          +'<td style="padding:9px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+(nao?chip(sc,enviado?(sit||'—'):'—'):'<span style="font-size:12px;color:var(--text3)">—</span>')+'</td>'
           +'</tr>';
       }).join('');
 
@@ -1418,7 +1414,7 @@ function renderConf(){
           +'<div style="padding:4px 16px 14px;overflow-x:auto">'
             +(parts.length
               ?'<table style="width:100%;border-collapse:collapse;margin-top:8px;min-width:560px">'
-                +'<thead><tr>'+th('Participante')+th('Presença')+th('Cumpriu atividades')+th('Substituição / Desligamento')+'</tr></thead>'
+                +'<thead><tr>'+th('Participante')+th('Cumpriu atividades?')+th('Situação')+'</tr></thead>'
                 +'<tbody>'+partRows+'</tbody></table>'
               :'<p style="font-size:12px;color:var(--text3);padding:8px 0">Nenhum participante cadastrado.</p>')
             +(enviado&&assid.observacoes?'<div class="conf-obs" style="margin-top:10px"><strong>Observações:</strong> '+assid.observacoes+'</div>':'')
@@ -1470,15 +1466,13 @@ async function validarAssid(id, segmento){
 // COORD — ASSIDUIDADE
 // ════════════════════════════════════════════════
 // Status options
-const OPT_PRESENCA    = ['Presente','Ausente','Parcial'];
 const OPT_CUMPRIU     = ['Sim','Não'];
-const OPT_SUBSTITUICAO= ['Não houve','Substituição','Desligamento'];
+const OPT_SITUACAO    = ['Substituição','Desligamento'];
 
 function sgCls(field, val){
   const map={
-    presenca:  {Presente:'sel-presente',Ausente:'sel-ausente',Parcial:'sel-parcial'},
-    cumpriu:   {Sim:'sel-sim','Não':'sel-nao'},
-    subst:     {'Não houve':'sel-naoh',Substituição:'sel-sub-b',Desligamento:'sel-deslig'}
+    cumpriu:  {Sim:'sel-sim','Não':'sel-nao'},
+    situacao: {Substituição:'sel-sub-b',Desligamento:'sel-deslig'}
   };
   return map[field]?.[val]||'';
 }
@@ -1490,14 +1484,13 @@ function sgBtn(field, opt, projId, partId, current, disabled){
 }
 
 function setStat(projId, partId, field, val){
-  // Toggle: se já selecionado, desmarca
-  const key=`stat-${projId}-${partId}-${field}`;
-  const cur=window._stat?.[key];
   if(!window._stat) window._stat={};
-  window._stat[key]= (cur===val) ? null : val;
-  // Se marcou Ausente, limpa cumpriu
-  if(field==='presenca' && val==='Ausente') window._stat[`stat-${projId}-${partId}-cumpriu`]=null;
-  // Re-render só a linha do participante
+  const key=`stat-${projId}-${partId}-${field}`;
+  const cur=window._stat[key];
+  window._stat[key]=(cur===val)?null:val;
+  // Se marcou Sim em cumpriu, limpa situacao
+  if(field==='cumpriu' && val==='Sim') window._stat[`stat-${projId}-${partId}-situacao`]=null;
+  // Re-render a linha
   const row=document.getElementById(`srow-${projId}-${partId}`);
   if(row) row.outerHTML=renderPartStatusRow(
     D.participantes.find(p=>String(p.id)===String(partId)),
@@ -1515,14 +1508,11 @@ function calcObsAvisos(projId){
   const parts=D.participantes.filter(p=>String(p.projetoId)===String(projId));
   const msgs=[];
   parts.forEach(p=>{
-    const pres =getStat(projId,p.id,'presenca');
     const cum  =getStat(projId,p.id,'cumpriu');
-    const sub  =getStat(projId,p.id,'subst');
-    if(pres==='Ausente')    msgs.push(`<li><strong>${p.nome}:</strong> descreva o motivo da ausência.</li>`);
-    if(pres==='Parcial')    msgs.push(`<li><strong>${p.nome}:</strong> descreva o período ou motivo da presença parcial.</li>`);
-    if(cum==='Não')         msgs.push(`<li><strong>${p.nome}:</strong> descreva quais atividades não foram cumpridas.</li>`);
-    if(sub==='Substituição')msgs.push(`<li><strong>${p.nome}:</strong> informe os dados do substituto.</li>`);
-    if(sub==='Desligamento')msgs.push(`<li><strong>${p.nome}:</strong> descreva o motivo do desligamento.</li>`);
+    const sit  =getStat(projId,p.id,'situacao');
+    if(cum==='Não')            msgs.push(`<li><strong>${p.nome}:</strong> descreva quais atividades não foram cumpridas.</li>`);
+    if(sit==='Substituição')   msgs.push(`<li><strong>${p.nome}:</strong> informe os dados do substituto.</li>`);
+    if(sit==='Desligamento')   msgs.push(`<li><strong>${p.nome}:</strong> descreva o motivo do desligamento.</li>`);
   });
   return msgs;
 }
@@ -1548,28 +1538,27 @@ function checkObsAviso(projId){
 }
 
 function renderPartStatusRow(p, projId, ro, sentData){
-  const presenca  = ro ? (sentData?.presencas?.[String(p.id)]?.presenca||'—')  : (getStat(projId,p.id,'presenca')||'');
-  const cumpriu   = ro ? (sentData?.presencas?.[String(p.id)]?.cumpriu||'—')   : (getStat(projId,p.id,'cumpriu')||'');
-  const subst     = ro ? (sentData?.presencas?.[String(p.id)]?.subst||'—')     : (getStat(projId,p.id,'subst')||'');
-  const isAusente = presenca==='Ausente';
+  const cumpriu  = ro ? (sentData?.presencas?.[String(p.id)]?.cumpriu||'—')  : (getStat(projId,p.id,'cumpriu')||'');
+  const situacao = ro ? (sentData?.presencas?.[String(p.id)]?.situacao||'—') : (getStat(projId,p.id,'situacao')||'');
+  const nao      = cumpriu==='Não';
 
   if(ro){
-    const pCls=sgCls('presenca',presenca);
     const cCls=sgCls('cumpriu',cumpriu);
-    const sCls=sgCls('subst',subst);
+    const sCls=sgCls('situacao',situacao);
     return `<tr id="srow-${projId}-${p.id}">
       <td><div class="part-name-cell">${p.nome}<em>${p.tipo}</em></div></td>
-      <td><span class="sg-btn ${pCls}" style="cursor:default">${presenca}</span></td>
-      <td><span class="sg-btn ${isAusente?'':cCls}" style="cursor:default;${isAusente?'opacity:.3':''}">${isAusente?'—':cumpriu}</span></td>
-      <td><span class="sg-btn ${sCls}" style="cursor:default">${subst}</span></td>
+      <td><span class="sg-btn ${cCls}" style="cursor:default">${cumpriu}</span></td>
+      <td>${nao?`<span class="sg-btn ${sCls}" style="cursor:default">${situacao||'—'}</span>`:'<span style="font-size:12px;color:var(--text3)">—</span>'}</td>
     </tr>`;
   }
 
   return `<tr id="srow-${projId}-${p.id}">
     <td><div class="part-name-cell">${p.nome}<em>${p.tipo}</em></div></td>
-    <td><div class="btn-group">${OPT_PRESENCA.map(o=>sgBtn('presenca',o,projId,p.id,presenca,false)).join('')}</div></td>
-    <td><div class="btn-group">${OPT_CUMPRIU.map(o=>sgBtn('cumpriu',o,projId,p.id,cumpriu,isAusente)).join('')}</div></td>
-    <td><div class="btn-group">${OPT_SUBSTITUICAO.map(o=>sgBtn('subst',o,projId,p.id,subst,false)).join('')}</div></td>
+    <td><div class="btn-group">${OPT_CUMPRIU.map(o=>sgBtn('cumpriu',o,projId,p.id,cumpriu,false)).join('')}</div></td>
+    <td>${nao
+      ?`<div class="btn-group">${OPT_SITUACAO.map(o=>sgBtn('situacao',o,projId,p.id,situacao,false)).join('')}</div>`
+      :'<span style="font-size:12px;color:var(--text3);padding:0 4px">—</span>'
+    }</td>
   </tr>`;
 }
 
@@ -1598,9 +1587,8 @@ function renderCoordProjs(){
     <table class="part-status-table">
       <thead><tr>
         <th>Participante</th>
-        <th>Presença</th>
-        <th>Cumpriu atividades</th>
-        <th>Substituição / Desligamento</th>
+        <th>Cumpriu atividades?</th>
+        <th>Situação</th>
       </tr></thead>
       <tbody>
         ${parts.map(p=>renderPartStatusRow(p,proj.id,ro,sent)).join('')}
@@ -1666,23 +1654,19 @@ async function submitAll(){
   for(const proj of ready){
     const parts=D.participantes.filter(p=>String(p.projetoId)===String(proj.id));
     for(const p of parts){
-      if(!getStat(proj.id,p.id,'presenca')){
-        toast(`Presença obrigatória — "${p.nome}" não foi preenchida.`,'error');return;
-      }
-      const pres=getStat(proj.id,p.id,'presenca');
-      if(pres!=='Ausente'&&!getStat(proj.id,p.id,'cumpriu')){
+      if(!getStat(proj.id,p.id,'cumpriu')){
         toast(`Informe se "${p.nome}" cumpriu as atividades.`,'error');return;
       }
-      if(!getStat(proj.id,p.id,'subst')){
-        toast(`Informe substituição/desligamento de "${p.nome}".`,'error');return;
+      if(getStat(proj.id,p.id,'cumpriu')==='Não'&&!getStat(proj.id,p.id,'situacao')){
+        toast(`Informe a situação de "${p.nome}" (Substituição ou Desligamento).`,'error');return;
       }
     }
-    // Valida observação obrigatória
+    // Observação obrigatória se algum participante não cumpriu
     const avisos=calcObsAvisos(proj.id);
     if(avisos.length){
       const obs=document.getElementById(`obs-${proj.id}`)?.value?.trim();
       if(!obs){
-        toast(`Preencha o campo de observações do projeto "${proj.titulo}" — há situações que requerem justificativa.`,'error');
+        toast(`Preencha as observações do projeto "${proj.titulo}" — há participantes que não cumpriram as atividades.`,'error');
         document.getElementById(`obs-${proj.id}`)?.focus();
         return;
       }
@@ -1697,9 +1681,8 @@ async function submitAll(){
       const presencas={};
       parts.forEach(p=>{
         presencas[p.id]={
-          presenca: getStat(proj.id,p.id,'presenca'),
           cumpriu:  getStat(proj.id,p.id,'cumpriu')||null,
-          subst:    getStat(proj.id,p.id,'subst')
+          situacao: getStat(proj.id,p.id,'situacao')||null
         };
       });
       const obs=document.getElementById(`obs-${proj.id}`)?.value||'';
@@ -1741,8 +1724,7 @@ function renderCoordHist(){
     return;
   }
 
-  const presColor={Presente:'#E8F7EF;color:#1A7F4B',Ausente:'#FDECEA;color:#C0392B',Parcial:'#FEF3C7;color:#B45309'};
-  const subColor={'Não houve':'#E8F7EF;color:#1A7F4B','Substituição':'#EBF0FF;color:#1240A8','Desligamento':'#FDECEA;color:#C0392B'};
+
   const chip=(bg,v)=>'<span style="display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;background:'+bg+'">'+v+'</span>';
 
   // Meses em ordem crescente a partir do ano atual
@@ -1777,18 +1759,15 @@ function renderCoordHist(){
 
       const partRows=parts.map(p=>{
         const pd=enviado&&assid.presencas?assid.presencas[String(p.id)]:{};
-        const pres=pd?.presenca||'';
         const cum=pd?.cumpriu||'';
-        const sub=pd?.subst||'';
-        const isAus=pres==='Ausente';
-        const pc=presColor[pres]||'#F3F4F6;color:#6B7280';
-        const cc=isAus?'#F3F4F6;color:#9C8270':({Sim:'#E8F7EF;color:#1A7F4B','Não':'#FDECEA;color:#C0392B'}[cum]||'#F3F4F6;color:#6B7280');
-        const sc=subColor[sub]||'#F3F4F6;color:#6B7280';
+        const sit=pd?.situacao||'';
+        const nao=cum==='Não';
+        const cc={Sim:'#E8F7EF;color:#1A7F4B','Não':'#FDECEA;color:#C0392B'}[cum]||'#F3F4F6;color:#6B7280';
+        const sc={Substituição:'#EBF0FF;color:#1240A8',Desligamento:'#FDECEA;color:#C0392B'}[sit]||'#F3F4F6;color:#6B7280';
         return '<tr>'
           +'<td style="padding:8px 10px 8px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;vertical-align:middle">'+p.nome+'<br><span class="badge b-'+(p.tipo==='Bolsista'?'bolsista':'voluntario')+'" style="margin-top:2px">'+p.tipo+'</span></td>'
-          +'<td style="padding:8px 10px 8px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+chip(pc,enviado?(pres||'—'):'—')+'</td>'
-          +'<td style="padding:8px 10px 8px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+chip(cc,enviado?(isAus?'—':(cum||'—')):'—')+'</td>'
-          +'<td style="padding:8px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+chip(sc,enviado?(sub||'—'):'—')+'</td>'
+          +'<td style="padding:8px 10px 8px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+chip(cc,enviado?(cum||'—'):'—')+'</td>'
+          +'<td style="padding:8px 0;border-bottom:1px solid var(--border);vertical-align:middle">'+(nao?chip(sc,enviado?(sit||'—'):'—'):'<span style="font-size:12px;color:var(--text3)">—</span>')+'</td>'
           +'</tr>';
       }).join('');
 
@@ -1814,7 +1793,7 @@ function renderCoordHist(){
           +'<div style="padding:4px 14px 12px;overflow-x:auto">'
             +(parts.length
               ?'<table style="width:100%;border-collapse:collapse;margin-top:8px;min-width:520px">'
-                +'<thead><tr>'+th('Participante')+th('Presença')+th('Cumpriu ativ.')+th('Substituição / Deslig.')+'</tr></thead>'
+                +'<thead><tr>'+th('Participante')+th('Cumpriu atividades?')+th('Situação')+'</tr></thead>'
                 +'<tbody>'+partRows+'</tbody></table>'
               :'<p style="font-size:12px;color:var(--text3);padding:8px 0">Nenhum participante cadastrado.</p>')
             +(enviado&&assid.observacoes?'<div class="conf-obs" style="margin-top:10px"><strong>Observações:</strong> '+assid.observacoes+'</div>':'')
@@ -2166,11 +2145,10 @@ function buildExportRows(){
     } else {
       parts.forEach(p=>{
         const pd=enviado&&assid.presencas?assid.presencas[String(p.id)]:{};
-        const pres  = enviado?(pd?.presenca||'—'):'—';
-        const cum   = enviado?(pd?.presenca==='Ausente'?'—':(pd?.cumpriu||'—')):'—';
-        const sub   = enviado?(pd?.subst||'—'):'—';
-        const obs   = enviado?(assid.observacoes||'—'):'—';
-        rows.push([coord.nome, proj.titulo, proj.segmento, p.nome, p.tipo, pres, cum, sub, obs, status]);
+        const cum  = enviado?(pd?.cumpriu||'—'):'—';
+        const sit  = enviado?(pd?.cumpriu==='Não'?(pd?.situacao||'—'):'—'):'—';
+        const obs  = enviado?(assid.observacoes||'—'):'—';
+        rows.push([coord.nome, proj.titulo, proj.segmento, p.nome, p.tipo, cum, sit, obs, status]);
       });
     }
   });
@@ -2189,7 +2167,7 @@ function exportarXLS(){
   const {rows, mes, seg, mesVal}=buildExportRows();
   if(!rows.length){toast('Nenhum dado para exportar.','error');return;}
 
-  const header=['Coordenador','Projeto','Segmento','Participante','Tipo','Presença','Cumpriu Atividades','Substituição/Desligamento','Observações','Status'];
+  const header=['Coordenador','Projeto','Segmento','Participante','Tipo','Cumpriu Atividades','Situação','Observações','Status'];
 
   // Monta CSV com separador ponto-e-vírgula (abre direto no Excel BR)
   const titulo='Assiduidade — '+seg+' · '+mes;
@@ -2217,8 +2195,8 @@ function exportarPDF(){
   const {rows, mes, seg}=buildExportRows();
   if(!rows.length){toast('Nenhum dado para exportar.','error');return;}
 
-  const header=['Coordenador','Projeto','Segmento','Participante','Tipo','Presença','Cumpriu','Substituição','Observações','Status'];
-  const colWidths=[14,16,11,14,9,9,8,12,16,10]; // % larguras
+  const header=['Coordenador','Projeto','Segmento','Participante','Tipo','Cumpriu Atividades','Situação','Observações','Status'];
+  const colWidths=[15,17,11,15,9,11,11,17,14]; // % larguras
 
   const statusColor=(s)=>{
     if(s==='Validado')   return '#1A7F4B';
@@ -2226,11 +2204,11 @@ function exportarPDF(){
     if(s==='Não enviado')return '#9C8270';
     return '#1A1208';
   };
-  const presColor=(v)=>({Presente:'#1A7F4B',Ausente:'#C0392B',Parcial:'#B45309'}[v]||'#9C8270');
   const cellStyle=(v,col)=>{
     let color='#1A1208';
-    if(col===5)color=presColor(v);
-    if(col===9)color=statusColor(v);
+    if(col===5)color=(v==='Sim'?'#1A7F4B':v==='Não'?'#C0392B':'#9C8270');
+    if(col===6)color=(v==='Substituição'?'#1240A8':v==='Desligamento'?'#C0392B':'#9C8270');
+    if(col===8)color=statusColor(v);
     return 'padding:5px 7px;font-size:10px;border:1px solid #e0e0e0;vertical-align:top;color:'+color+';font-weight:'+(col===9?'700':'400')+';word-break:break-word';
   };
 
