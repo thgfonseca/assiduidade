@@ -410,6 +410,10 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
       Logs / Auditoria
     </button>
+    <button class="tab-btn" id="tb-notif" onclick="adminTab('notif')">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Notificações
+    </button>
   </div>
   <div class="content">
 
@@ -444,6 +448,22 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
         <h2 style="font-size:18px;font-weight:800">Conferência de Assiduidade</h2>
         <p style="font-size:13px;color:var(--text3);margin-top:3px">Visualize e valide as assiduidades enviadas</p>
       </div>
+      <!-- Período de Respostas -->
+      <div id="periodo-bar" style="background:#EBF0FF;border:1px solid #D6E4FF;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <p style="font-size:13px;font-weight:700;color:var(--blue-d);margin:0" id="periodo-status-txt">Carregando período...</p>
+          <p style="font-size:12px;color:var(--text3);margin:3px 0 0" id="periodo-detalhe-txt"></p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="abrirModalPeriodo()">⚙ Configurar Período</button>
+          <button class="btn btn-ghost btn-sm" onclick="forcarHabilitacao()">⚡ Habilitar 48h</button>
+        </div>
+      </div>
+      <!-- Fila de Solicitações -->
+      <div id="solicitacoes-bar" style="display:none;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:14px 18px;margin-bottom:16px">
+        <p style="font-size:13px;font-weight:700;color:var(--warn);margin:0 0 10px">📬 Solicitações de Liberação Pendentes</p>
+        <div id="solicitacoes-list"></div>
+      </div>
       <div class="filter-bar" style="align-items:flex-end;justify-content:space-between;flex-wrap:wrap">
         <div style="display:flex;gap:11px;flex-wrap:wrap;align-items:flex-end">
           <div class="fi"><label>Mês</label><select id="conf-mes" onchange="renderConf()"></select></div>
@@ -451,6 +471,20 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
             <select id="conf-seg" onchange="renderConf()">
               <option value="">Todos</option>
               <option>Ensino</option><option>Pesquisa</option><option>Extensão</option><option>Indissociável</option>
+            </select>
+          </div>
+          <div class="fi"><label>Envio</label>
+            <select id="conf-envio" onchange="renderConf()">
+              <option value="">Todos</option>
+              <option value="enviado">Enviado</option>
+              <option value="nao_enviado">Não enviado</option>
+            </select>
+          </div>
+          <div class="fi"><label>Validação</label>
+            <select id="conf-valid" onchange="renderConf()">
+              <option value="">Todos</option>
+              <option value="validado">Validado</option>
+              <option value="pendente">Pendente</option>
             </select>
           </div>
         </div>
@@ -512,6 +546,56 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
       <div id="logs-list"></div>
     </div>
 
+    <!-- TAB NOTIFICAÇÕES -->
+    <div class="tab-panel" id="panel-notif">
+      <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2 style="font-size:18px;font-weight:800">Notificações</h2>
+          <p style="font-size:13px;color:var(--text3);margin-top:3px">Configure lembretes automáticos de assiduidade</p>
+        </div>
+        <button class="btn btn-primary" onclick="abrirNovaNotificacao()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo Lembrete
+        </button>
+      </div>
+      <div style="background:#EBF0FF;border:1px solid #D6E4FF;border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--blue-d);line-height:1.6">
+        <strong>Como funciona:</strong> Configure no Apps Script um trigger diário para a função <code style="background:#D6E4FF;padding:2px 6px;border-radius:4px">dispararLembretesDiario()</code>. 
+        Ela verificará diariamente quais lembretes estão ativos para o dia corrente e enviará os e-mails automaticamente.
+      </div>
+      <!-- Form inline novo lembrete -->
+      <div class="iform" id="iform-notif" style="margin-bottom:20px">
+        <div class="iform-row">
+          <div class="iform-field">
+            <label>Dia do mês</label>
+            <input type="number" id="notif-dia" min="1" max="28" placeholder="Ex: 25"/>
+          </div>
+          <div class="iform-field">
+            <label>Destinatários</label>
+            <select id="notif-dest">
+              <option value="nao_enviaram">Que NÃO enviaram</option>
+              <option value="enviaram">Que já enviaram</option>
+            </select>
+          </div>
+          <div class="iform-field">
+            <label>Segmento</label>
+            <select id="notif-seg">
+              <option value="Todos">Todos</option>
+              <option>Ensino</option><option>Pesquisa</option><option>Extensão</option><option>Indissociável</option>
+            </select>
+          </div>
+          <div class="iform-field">
+            <label>Ativo</label>
+            <select id="notif-ativo"><option value="true">Sim</option><option value="false">Não</option></select>
+          </div>
+        </div>
+        <div class="iform-actions">
+          <button class="btn btn-primary btn-sm" onclick="salvarNotificacao()">Salvar</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeIForm('iform-notif')">Cancelar</button>
+        </div>
+      </div>
+      <div id="notif-list"></div>
+    </div>
+
   </div>
 </div>
 
@@ -565,6 +649,22 @@ h1,h2,h3,h4,h5{font-family:'Sora',sans-serif}
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       Enviar Assiduidade
     </button>
+  </div>
+</div>
+
+<!-- MODAL PERÍODO -->
+<div class="modal-ov" id="m-periodo">
+  <div class="modal">
+    <div class="modal-hd"><h3>Configurar Período de Respostas</h3><button class="modal-cl" onclick="closeModal('m-periodo')">×</button></div>
+    <div class="modal-bd">
+      <p style="font-size:13px;color:var(--text3);margin-bottom:16px">Define a janela em que coordenadores podem enviar assiduidade.</p>
+      <div class="frow"><label>Data de início</label><input type="date" id="per-inicio"/></div>
+      <div class="frow"><label>Data de fim</label><input type="date" id="per-fim"/></div>
+      <div class="modal-ft">
+        <button class="btn btn-ghost" onclick="closeModal('m-periodo')">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarPeriodo()">Salvar Período</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -625,7 +725,8 @@ const DOMAIN          = '@riogrande.ifrs.edu.br';
 const ADMIN_VALIDACAO = {
   'dex@riogrande.ifrs.edu.br':  ['Extensão'],
   'dppi@riogrande.ifrs.edu.br': ['Pesquisa','Indissociável'],
-  'den@riogrande.ifrs.edu.br':  ['Ensino']
+  'den@riogrande.ifrs.edu.br':  ['Ensino'],
+  'saen@riogrande.ifrs.edu.br': ['Ensino']
 };
 
 // ════════════════════════════════════════════════
@@ -781,20 +882,63 @@ function enterAdmin(){
   fillMes('conf-mes');
   renderMgmt();
 }
-function enterCoord(){
+async function enterCoord(){
   showPage('page-coord');
   setAv('crd-av',CU.nome,CU.picture);
   document.getElementById('crd-name').textContent=CU.nome;
   document.getElementById('crd-email').textContent=CU.email;
   fillMes('coord-mes');
-  // Garante aba de registro ativa e submit bar visível
   ['reg','hist'].forEach(t=>{
     document.getElementById('ctb-'+t)?.classList.toggle('active',t==='reg');
     document.getElementById('cpanel-'+t)?.classList.toggle('active',t==='reg');
   });
   const bar=document.getElementById('coord-sub-bar');
   if(bar) bar.style.display='flex';
+  // Verifica período antes de renderizar
+  await checkPeriodoCoord();
   renderCoordProjs();
+}
+
+let PERIODO_ABERTO = true; // default otimista
+
+async function checkPeriodoCoord(){
+  try{
+    const r=await api('getPeriodo',{coordEmail:CU.email});
+    PERIODO_ABERTO=r.aberto;
+    renderPeriodoBannerCoord(r);
+  }catch(e){ PERIODO_ABERTO=true; } // se erro, não bloqueia
+}
+
+function renderPeriodoBannerCoord(r){
+  // Remove banner anterior se existir
+  document.getElementById('coord-periodo-banner')?.remove();
+  const cont=document.getElementById('coord-projs');
+  if(!cont)return;
+
+  const banner=document.createElement('div');
+  banner.id='coord-periodo-banner';
+
+  if(r.aberto){
+    const motivoTxt={
+      periodo:'O sistema está aberto para envio de assiduidade.',
+      forcado:'O sistema está temporariamente habilitado pelo administrador.',
+      liberacao_individual:'Sua solicitação foi aprovada. Você tem acesso por 48 horas.'
+    }[r.motivo]||'Sistema aberto.';
+    banner.style.cssText='background:#E8F7EF;border:1px solid #A7F3D0;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#1A7F4B;display:flex;align-items:center;gap:8px';
+    banner.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+motivoTxt;
+  } else {
+    banner.style.cssText='background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:16px;margin-bottom:16px';
+    banner.innerHTML=`
+      <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+        <div style="flex:1">
+          <p style="font-size:14px;font-weight:700;color:var(--warn);margin:0 0 4px">🔒 Período de envio encerrado</p>
+          <p style="font-size:13px;color:var(--text2);margin:0;line-height:1.5">O sistema não está aceitando envios no momento.${r.periodo?(' Próximo período: '+fmtDate(r.periodo.dataInicio)+' a '+fmtDate(r.periodo.dataFim)):''}  Se precisar enviar fora do prazo, solicite uma liberação.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="solicitarLiberacao()">Solicitar Liberação</button>
+      </div>`;
+  }
+  // Insere antes do cont
+  cont.parentNode.insertBefore(banner,cont);
 }
 function doLogout(){CU=null;isAdmin=false;showPage('page-login');document.getElementById('login-err').classList.remove('show');}
 
@@ -802,17 +946,18 @@ function doLogout(){CU=null;isAdmin=false;showPage('page-login');document.getEle
 // TABS ADMIN
 // ════════════════════════════════════════════════
 async function adminTab(name){
-  ['ger','conf','logs'].forEach(t=>{
+  ['ger','conf','logs','notif'].forEach(t=>{
     document.getElementById('tb-'+t)?.classList.toggle('active',t===name);
     document.getElementById('panel-'+t)?.classList.toggle('active',t===name);
   });
   if(name==='conf'){
     try{showLoader();await loadData();hideLoader();}catch(e){hideLoader();}
+    await loadPeriodo();
+    await loadSolicitacoes();
     renderConf();
   }
-  if(name==='logs'){
-    await loadLogs();
-  }
+  if(name==='logs') await loadLogs();
+  if(name==='notif') await loadNotificacoes();
 }
 
 // ════════════════════════════════════════════════
@@ -1169,8 +1314,25 @@ function renderConf(){
   const seg=(document.getElementById('conf-seg')?.value||'').trim();
   const cont=document.getElementById('conf-list');if(!cont)return;
 
+  const filtroEnvio=(document.getElementById('conf-envio')?.value||'').trim();
+  const filtroValid=(document.getElementById('conf-valid')?.value||'').trim();
+
   let projsFiltrados=D.projetos.filter(p=>p.status==='Ativo');
   if(seg) projsFiltrados=projsFiltrados.filter(p=>p.segmento===seg);
+
+  // Filtro envio/validação — baseado na existência de assiduidade
+  if(filtroEnvio||filtroValid){
+    projsFiltrados=projsFiltrados.filter(proj=>{
+      const assid=D.assiduidades.find(a=>String(a.projetoId)===String(proj.id)&&String(a.mes).trim()===mes);
+      const enviado=!!assid;
+      const validado=enviado&&assid.status==='Validado';
+      if(filtroEnvio==='enviado'&&!enviado)    return false;
+      if(filtroEnvio==='nao_enviado'&&enviado) return false;
+      if(filtroValid==='validado'&&!validado)  return false;
+      if(filtroValid==='pendente'&&(validado||!enviado)) return false;
+      return true;
+    });
+  }
 
   if(!projsFiltrados.length){
     cont.innerHTML='<div class="empty"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><h3>Nenhum projeto encontrado</h3><p>Nenhum projeto ativo para o filtro selecionado.</p></div>';
@@ -1466,8 +1628,32 @@ function updateSubmit(){
   const myProjs=D.projetos.filter(p=>String(p.coordId)===String(CU?.id)&&p.status==='Ativo');
   const pending=myProjs.filter(p=>!D.assiduidades.find(a=>String(a.projetoId)===String(p.id)&&String(a.mes).trim()===String(mes).trim()));
   const ready=pending.filter(p=>document.getElementById(`decl-${p.id}`)?.checked);
-  document.getElementById('sub-summary').textContent=`${ready.length} de ${pending.length} projeto(s) pronto${ready.length!==1?'s':''} para envio — `;
-  document.getElementById('btn-submit').disabled=(ready.length===0);
+  const btnSubmit=document.getElementById('btn-submit');
+  const btnTxt=document.getElementById('sub-summary');
+  if(!PERIODO_ABERTO){
+    if(btnTxt) btnTxt.textContent='Sistema fechado para envio no momento. ';
+    if(btnSubmit) btnSubmit.disabled=true;
+    return;
+  }
+  if(btnTxt) btnTxt.textContent=`${ready.length} de ${pending.length} projeto(s) pronto${ready.length!==1?'s':''} para envio — `;
+  if(btnSubmit) btnSubmit.disabled=(ready.length===0);
+}
+
+async function solicitarLiberacao(){
+  const motivo=prompt('Descreva brevemente o motivo da solicitação (opcional):');
+  if(motivo===null)return; // cancelou
+  try{
+    showLoader();
+    await api('solicitarLiberacao',{
+      coordId:CU.id, coordEmail:CU.email, coordNome:CU.nome,
+      motivo:motivo||''
+    });
+    hideLoader();
+    toast('Solicitação enviada! Os administradores serão notificados.','success',5000);
+  }catch(e){
+    hideLoader();
+    toast(e.message||'Erro ao enviar solicitação.','error');
+  }
 }
 
 async function submitAll(){
@@ -1666,6 +1852,216 @@ function togHistProj(head, bodyId){
   const isHidden=b.style.display==='none'||b.style.display==='';
   b.style.display=isHidden?'block':'none';
   c?.classList.toggle('open',isHidden);
+}
+
+// ════════════════════════════════════════════════
+// PERÍODO DE RESPOSTAS
+// ════════════════════════════════════════════════
+let PERIODO_DATA = null;
+
+async function loadPeriodo(){
+  try{
+    const r=await api('getPeriodo',{});
+    PERIODO_DATA=r;
+    renderPeriodoBar();
+  }catch(e){ Logger.log && Logger.log(e); }
+}
+
+function renderPeriodoBar(){
+  if(!PERIODO_DATA)return;
+  const {periodo, aberto, motivo}=PERIODO_DATA;
+  const statusEl=document.getElementById('periodo-status-txt');
+  const detEl=document.getElementById('periodo-detalhe-txt');
+  if(!statusEl)return;
+  if(aberto){
+    statusEl.textContent='✅ Sistema aberto para envio de assiduidade';
+    statusEl.style.color='#1A7F4B';
+    const motivoTxt={periodo:'Dentro do período configurado',forcado:'Habilitação manual ativa',liberacao_individual:''}[motivo]||'';
+    detEl.textContent=motivoTxt+(periodo?(' · Período: '+fmtDate(periodo.dataInicio)+' → '+fmtDate(periodo.dataFim)):'');
+  } else {
+    statusEl.textContent='🔒 Sistema fechado para envio de assiduidade';
+    statusEl.style.color='#C0392B';
+    detEl.textContent=periodo?('Período: '+fmtDate(periodo.dataInicio)+' → '+fmtDate(periodo.dataFim)):'Nenhum período configurado';
+  }
+  // Preenche datas padrão no modal se vazio
+  if(periodo){
+    const el=document.getElementById('per-inicio');
+    const el2=document.getElementById('per-fim');
+    if(el&&!el.value) el.value=periodo.dataInicio?periodo.dataInicio.substring(0,10):'';
+    if(el2&&!el2.value) el2.value=periodo.dataFim?periodo.dataFim.substring(0,10):'';
+  }
+}
+
+function fmtDate(d){
+  if(!d)return '—';
+  try{return new Date(d).toLocaleDateString('pt-BR');}catch(e){return d;}
+}
+
+function abrirModalPeriodo(){
+  // Preenche datas padrão: dia 1 mês atual → dia 10 mês seguinte
+  const agora=new Date();
+  const ini=new Date(agora.getFullYear(),agora.getMonth(),1);
+  const fim=new Date(agora.getFullYear(),agora.getMonth()+1,10);
+  const toInput=d=>d.toISOString().substring(0,10);
+  const elI=document.getElementById('per-inicio');
+  const elF=document.getElementById('per-fim');
+  if(elI&&!elI.value) elI.value=toInput(ini);
+  if(elF&&!elF.value) elF.value=toInput(fim);
+  openModal('m-periodo');
+}
+
+async function salvarPeriodo(){
+  const ini=document.getElementById('per-inicio')?.value;
+  const fim=document.getElementById('per-fim')?.value;
+  if(!ini||!fim){toast('Informe as datas.','error');return;}
+  try{
+    await api('setPeriodo',{dataInicio:ini,dataFim:fim,adminEmail:CU.email,adminNome:CU.nome});
+    closeModal('m-periodo');
+    await loadPeriodo();
+    toast('Período salvo com sucesso.','success');
+  }catch(e){toast(e.message,'error');}
+}
+
+async function forcarHabilitacao(){
+  const ok=await confirm2('Habilitar por 48h','Abrir o sistema para todos os coordenadores por 48 horas?','Habilitar');
+  if(!ok)return;
+  try{
+    const r=await api('forcarHabilitacao',{horas:48,adminEmail:CU.email,adminNome:CU.nome});
+    await loadPeriodo();
+    toast('Sistema habilitado por 48h.','success');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ════════════════════════════════════════════════
+// SOLICITAÇÕES DE LIBERAÇÃO
+// ════════════════════════════════════════════════
+async function loadSolicitacoes(){
+  try{
+    const r=await api('getSolicitacoes',{adminEmail:CU.email});
+    renderSolicitacoes(r.solicitacoes||[]);
+  }catch(e){}
+}
+
+function renderSolicitacoes(sols){
+  const bar=document.getElementById('solicitacoes-bar');
+  const list=document.getElementById('solicitacoes-list');
+  if(!bar||!list)return;
+  if(!sols.length){bar.style.display='none';return;}
+  bar.style.display='block';
+  list.innerHTML=sols.map(s=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 0;border-bottom:1px solid #FDE68A">
+      <div>
+        <span style="font-size:13px;font-weight:600;color:var(--text)">${s.coordNome}</span>
+        <span style="font-size:12px;color:var(--text3);margin-left:8px">${s.coordEmail}</span>
+        ${s.motivo?`<p style="font-size:12px;color:var(--text2);margin:3px 0 0">Motivo: ${s.motivo}</p>`:''}
+        <p style="font-size:11px;color:var(--text3);margin:2px 0 0">${fmtDate(s.criadoEm)}</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="resolverSolicitacao('${s.id}','aprovar')">✓ Aprovar</button>
+        <button class="btn btn-danger btn-sm" onclick="resolverSolicitacao('${s.id}','rejeitar')">✕ Rejeitar</button>
+      </div>
+    </div>`).join('');
+}
+
+async function resolverSolicitacao(id, acao){
+  const label=acao==='aprovar'?'Aprovar liberação por 48h':'Rejeitar solicitação';
+  const ok=await confirm2(label, acao==='aprovar'?'O coordenador será notificado e terá 48h de acesso.':'O coordenador será notificado da rejeição.',label);
+  if(!ok)return;
+  try{
+    await api('resolverSolicitacao',{id,acao,adminEmail:CU.email,adminNome:CU.nome});
+    await loadSolicitacoes();
+    toast(acao==='aprovar'?'Liberação aprovada. Coordenador notificado.':'Solicitação rejeitada.','success');
+  }catch(e){toast(e.message,'error');}
+}
+
+// ════════════════════════════════════════════════
+// NOTIFICAÇÕES AUTOMÁTICAS
+// ════════════════════════════════════════════════
+let NOTIF_DATA = [];
+
+async function loadNotificacoes(){
+  try{
+    const r=await api('getNotificacoes',{adminEmail:CU.email,adminNome:CU.nome});
+    NOTIF_DATA=r.notificacoes||[];
+    renderNotificacoes();
+  }catch(e){toast(e.message,'error');}
+}
+
+function abrirNovaNotificacao(){
+  document.getElementById('notif-dia').value='';
+  document.getElementById('notif-dest').value='nao_enviaram';
+  document.getElementById('notif-seg').value='Todos';
+  document.getElementById('notif-ativo').value='true';
+  openIForm('iform-notif');
+}
+
+async function salvarNotificacao(){
+  const dia=parseInt(document.getElementById('notif-dia')?.value);
+  const dest=document.getElementById('notif-dest')?.value;
+  const seg=document.getElementById('notif-seg')?.value;
+  const ativo=document.getElementById('notif-ativo')?.value==='true';
+  if(!dia||dia<1||dia>28){toast('Informe um dia entre 1 e 28.','error');return;}
+  try{
+    const r=await api('saveNotificacao',{dia,destinatarios:dest,segmento:seg,ativo,adminEmail:CU.email,adminNome:CU.nome});
+    NOTIF_DATA.push(r.item);
+    closeIForm('iform-notif');
+    renderNotificacoes();
+    toast('Lembrete salvo!','success');
+  }catch(e){toast(e.message,'error');}
+}
+
+function renderNotificacoes(){
+  const cont=document.getElementById('notif-list');
+  if(!cont)return;
+  if(!NOTIF_DATA.length){
+    cont.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><h3>Nenhum lembrete configurado</h3><p>Clique em "Novo Lembrete" para adicionar.</p></div>';
+    return;
+  }
+  const destLabel={nao_enviaram:'Que não enviaram',enviaram:'Que já enviaram'};
+  cont.innerHTML='<div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)">'
+    +NOTIF_DATA.map((n,i)=>{
+      const ativo=n.ativo===true||n.ativo==='TRUE';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:14px 18px;'+(i>0?'border-top:1px solid var(--border)':'')+';background:'+(ativo?'#fff':'#fafafa')+'">'
+        +'<div style="display:flex;align-items:center;gap:14px">'
+          +'<div style="width:42px;height:42px;background:'+(ativo?'var(--blue-p)':'#F3F4F6')+';border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+            +'<span style="font-family:Sora,sans-serif;font-weight:800;font-size:16px;color:'+(ativo?'var(--blue)':'#9C8270')+'">'+n.dia+'</span>'
+          +'</div>'
+          +'<div>'
+            +'<p style="font-size:13px;font-weight:700;margin:0;color:'+(ativo?'var(--text)':'var(--text3)')+'">Dia '+n.dia+' de cada mês</p>'
+            +'<p style="font-size:12px;color:var(--text3);margin:3px 0 0">'+(destLabel[n.destinatarios]||n.destinatarios)+' · Segmento: '+(n.segmento||'Todos')+'</p>'
+          +'</div>'
+        +'</div>'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+          +'<span style="display:inline-flex;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;background:'+(ativo?'var(--success-bg)':'#F3F4F6')+';color:'+(ativo?'var(--success)':'#6B7280')+'">'+(ativo?'Ativo':'Inativo')+'</span>'
+          +'<button class="btn btn-ghost btn-sm" data-nid="'+n.id+'" data-ativo="'+(!ativo)+'" onclick="toggleNotif(this.dataset.nid,this.dataset.ativo===\'true\')">'+( ativo?'Desativar':'Ativar')+'</button>'
+          +'<button class="icon-btn" data-nid="'+n.id+'" onclick="delNotif(this.dataset.nid)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>'
+        +'</div>'
+      +'</div>';
+    }).join('')
+  +'</div>';
+}
+
+async function toggleNotif(id, ativo){
+  try{
+    const n=NOTIF_DATA.find(x=>x.id==id);
+    if(!n)return;
+    await api('saveNotificacao',{id,dia:n.dia,destinatarios:n.destinatarios,segmento:n.segmento,ativo,adminEmail:CU.email,adminNome:CU.nome});
+    const i=NOTIF_DATA.findIndex(x=>x.id==id);
+    if(i>=0)NOTIF_DATA[i]={...NOTIF_DATA[i],ativo:ativo?'TRUE':'FALSE'};
+    renderNotificacoes();
+    toast('Lembrete '+(ativo?'ativado':'desativado')+'.','success');
+  }catch(e){toast(e.message,'error');}
+}
+
+async function delNotif(id){
+  const ok=await confirm2('Remover Lembrete','Esta ação não pode ser desfeita.','Remover');
+  if(!ok)return;
+  try{
+    await api('deleteNotificacao',{id,adminEmail:CU.email,adminNome:CU.nome});
+    NOTIF_DATA=NOTIF_DATA.filter(x=>x.id!=id);
+    renderNotificacoes();
+    toast('Lembrete removido.','success');
+  }catch(e){toast(e.message,'error');}
 }
 
 // ════════════════════════════════════════════════
